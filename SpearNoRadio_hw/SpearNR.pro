@@ -1,4 +1,4 @@
-update=17.11.2019 15:37:46
+update=01.12.2019 0:41:40
 version=1
 last_client=kicad
 [general]
@@ -16,8 +16,8 @@ LibDir=
 version=1
 PageLayoutDescrFile=
 LastNetListRead=
-LastSTEPExportPath=
-LastIDFExportPath=
+LastSTEPExportPath=Fabric/SpearNR.step
+LastIDFExportPath=Fabric/SpearNR.emn
 LastVRMLExportPath=
 LastSpecctraDSNExportPath=Spear.dsn
 LastGenCADExportPath=
@@ -65,7 +65,7 @@ DimensionPrecision=1
 SolderMaskClearance=0.06
 SolderMaskMinWidth=0.15
 SolderPasteClearance=0
-SolderPasteRatio=-0
+SolderPasteRatio=0
 [pcbnew/Layer.F.Cu]
 Name=F.Cu
 Type=0

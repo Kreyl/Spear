@@ -1,4 +1,4 @@
-711461711823912
+731613474797842
 Antennas
 ANT_868_10d4x36
 PCB{space}75.7x37.5,{space}AntPcb{space}14.8mm
@@ -195,6 +195,13 @@ MagicStick
 0
 1
 1
+BGA
+BGA-294_21x14_12.0x7.5mm
+
+
+0
+167
+167
 BtnsSwitches
 BTN_4PIN_12mm
 
@@ -1204,6 +1211,13 @@ USB{space}conn{space}type{space}B:{space}USBB-1J
 5
 5
 Connectors
+USB_C_MOLEX_1054500101
+
+
+0
+28
+28
+Connectors
 USBmicro_MOLEX_1050170001
 
 
@@ -1350,6 +1364,20 @@ uUSB_Micro5P
 0
 7
 7
+DIP
+DIP-8_296_ELL
+
+
+0
+8
+8
+DIP
+DIP-16_296_ELL
+
+
+0
+16
+16
 Diodes
 SMA_DO214AC
 
@@ -1392,6 +1420,27 @@ SOD923
 0
 2
 2
+Display
+7Segx4
+
+
+0
+36
+36
+Display
+Round2_2
+
+
+0
+30
+30
+FFC
+Conn_0d5x8
+
+
+0
+8
+8
 Inductors
 13x13
 
@@ -1980,6 +2029,20 @@ TQFP-32_7x7_Pitch0.8mm
 0
 32
 32
+Microphones
+CMM4030
+
+
+0
+9
+5
+Microphones
+SPH0644
+
+
+0
+5
+5
 Modules
 BT_HC0x
 
@@ -2779,6 +2842,13 @@ WSON12
 19
 13
 QFN_DFN
+X2QFN_12
+
+
+0
+12
+12
+QFN_DFN
 mrQFN76
 
 
@@ -3268,3 +3338,24 @@ TO220_VERTICAL
 0
 3
 3
+Transformers
+K28x16x9_2W_4BR
+
+
+0
+10
+10
+Transformers
+K28x16x9_2W_4BR_VERT
+
+
+0
+10
+10
+Transformers
+T60403
+
+
+0
+6
+6

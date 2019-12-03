@@ -1,3 +1,6 @@
 *.kicad_pcb-bak
 *.ses
 *.sch-bak
+*.xml
+*.prefs
+SpearNoRadio_hw/Fabric/SpearNR.step
