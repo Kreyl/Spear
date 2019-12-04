@@ -18,8 +18,15 @@ static void OnCmd(Shell_t *PShell);
 
 int main(void) {
     // ==== Init Vcore & clock system ====
-    SetupVCore(vcore1V5);
-    Clk.SetMSI4MHz();
+    SetupVCore(vcore1V8);
+    // PLL fed by HSI
+    if(Clk.EnableHSI() == retvOk) {
+        Clk.SetupFlashLatency(10);
+        Clk.SetupPLLSrc(pllSrcHSI16);
+        Clk.SetupPLLDividers(pllMul4, pllDiv3);
+        Clk.SetupBusDividers(ahbDiv2, apbDiv1, apbDiv1);
+        Clk.SwitchToPLL();
+    }
     Clk.UpdateFreqValues();
 
     // === Init OS ===

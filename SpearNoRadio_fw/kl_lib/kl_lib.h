@@ -1496,7 +1496,6 @@ enum APBDiv_t {apbDiv1=0b000, apbDiv2=0b100, apbDiv4=0b101, apbDiv8=0b110, apbDi
 class Clk_t {
 private:
     uint8_t EnableHSE();
-    uint8_t EnablePLL();
     uint8_t EnableMSI();
 public:
     // Frequency values
@@ -1510,6 +1509,7 @@ public:
     uint8_t SwitchToMSI();
     void DisableHSE() { RCC->CR &= ~RCC_CR_HSEON; }
     uint8_t EnableHSI();
+    uint8_t EnablePLL();
     void DisableHSI() { RCC->CR &= ~RCC_CR_HSION; }
     void DisablePLL() { RCC->CR &= ~RCC_CR_PLLON; }
     void DisableMSI() { RCC->CR &= ~RCC_CR_MSION; }
