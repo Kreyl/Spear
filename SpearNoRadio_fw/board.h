@@ -31,6 +31,11 @@
 #define BTN1_PIN        GPIOA, 0, pudPullDown
 #define BTN2_PIN        GPIOA, 1, pudPullDown
 
+// Npx LEDs
+#define NPX_SPI         SPI1
+#define NPX_DATA_PIN    GPIOA, 7, AF5
+#define NPX_PWR_PIN     GPIOA, 6
+
 #endif // GPIO
 
 #if ADC_REQUIRED // ======================= Inner ADC ==========================
@@ -58,6 +63,9 @@
 #define UART_DMA_TX     STM32_DMA_STREAM_ID(1, 4)
 #define UART_DMA_RX     STM32_DMA_STREAM_ID(1, 5)
 #define UART_DMA_CHNL   0   // Dummy
+
+// ==== Npx ====
+#define NPX_DMA         STM32_DMA_STREAM_ID(1, 3)  // SPI1 TX
 
 #if ADC_REQUIRED
 #define ADC_DMA         STM32_DMA1_STREAM1

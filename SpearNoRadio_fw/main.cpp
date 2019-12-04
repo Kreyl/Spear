@@ -5,6 +5,8 @@
 #include "MsgQ.h"
 #include "SimpleSensors.h"
 #include "buttons.h"
+#include "ws2812b.h"
+#include "color.h"
 
 #if 1 // ======================== Variables and defines ========================
 // Forever
@@ -14,6 +16,11 @@ CmdUart_t Uart{&CmdUartParams};
 static void ITask();
 static void OnCmd(Shell_t *PShell);
 
+static TmrKL_t TmrOneSecond {TIME_MS2I(180), evtIdEverySecond, tktPeriodic};
+
+// LEDs
+static const NeopixelParams_t NpxParams {NPX_SPI, NPX_DATA_PIN, NPX_DMA, NPX_DMA_MODE(0)};
+static Neopixels_t Leds{&NpxParams};
 #endif
 
 int main(void) {
@@ -21,7 +28,7 @@ int main(void) {
     SetupVCore(vcore1V8);
     // PLL fed by HSI
     if(Clk.EnableHSI() == retvOk) {
-        Clk.SetupFlashLatency(10);
+        Clk.SetupFlashLatency(16);
         Clk.SetupPLLSrc(pllSrcHSI16);
         Clk.SetupPLLDividers(pllMul4, pllDiv3);
         Clk.SetupBusDividers(ahbDiv2, apbDiv1, apbDiv1);
@@ -43,9 +50,20 @@ int main(void) {
     SimpleSensors::Init();
 #endif
 
+    // ==== Leds ====
+    Leds.Init();
+    Leds.SetAll(clGreen);
+    // Pwr pin
+    PinSetupOut(NPX_PWR_PIN, omPushPull);
+    PinSetHi(NPX_PWR_PIN);
+
+    TmrOneSecond.StartOrRestart();
+
     // Main cycle
     ITask();
 }
+
+ColorHSV_t ClrHsv(0, 100, 100);
 
 __noreturn
 void ITask() {
@@ -63,6 +81,12 @@ void ITask() {
 //                }
                 break;
 #endif
+
+            case evtIdEverySecond:
+                Leds.SetAll(ClrHsv.ToRGB());
+                if(++ClrHsv.H > 360) ClrHsv.H=0;
+                Leds.SetCurrentColors();
+                break;
 
             case evtIdShellCmd:
                 OnCmd((Shell_t*)Msg.Ptr);
