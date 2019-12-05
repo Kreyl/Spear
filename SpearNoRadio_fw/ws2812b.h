@@ -25,7 +25,7 @@
 #include <vector>
 typedef std::vector<Color_t> ColorBuf_t;
 #else
-#define LED_CNT     18
+#define LED_CNT     36
 #endif
 
 // SPI8 Buffer (no tuning required)
