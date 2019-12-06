@@ -16,6 +16,8 @@ static const UartParams_t CmdUartParams(115200, CMD_UART_PARAMS);
 CmdUart_t Uart{&CmdUartParams};
 static void ITask();
 static void OnCmd(Shell_t *PShell);
+static void EnterSleep();
+bool IsEnteringSleep = false;
 
 // LEDs
 static const NeopixelParams_t NpxParams {NPX_SPI, NPX_DATA_PIN, NPX_DMA, NPX_DMA_MODE(0)};
@@ -72,11 +74,11 @@ void ITask() {
 #if BUTTONS_ENABLED
             case evtIdButtons:
                 Printf("Btn %u\r", Msg.BtnEvtInfo.Type);
-//                if(Msg.BtnEvtInfo.Type == beShortPress) {
-//                }
-//                else if(Msg.BtnEvtInfo.Type == beLongCombo and Msg.BtnEvtInfo.BtnCnt == 3) {
-//                    Printf("Combo\r");
-//                }
+                if(Msg.BtnEvtInfo.Type == beShortPress) {
+                    IsEnteringSleep = !IsEnteringSleep;
+                    chThdSleepMilliseconds(999);
+                    EnterSleep();
+                }
                 break;
 #endif
 
@@ -88,6 +90,15 @@ void ITask() {
         } // Switch
     } // while true
 } // ITask()
+
+void EnterSleep() {
+    Printf("Entering sleep\r");
+    chThdSleepMilliseconds(45);
+    chSysLock();
+    Sleep::EnableWakeup1Pin();
+    Sleep::EnterStandby();
+    chSysUnlock();
+}
 
 #if 1 // ================= Command processing ====================
 void OnCmd(Shell_t *PShell) {

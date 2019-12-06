@@ -32,7 +32,7 @@ static void SetColorRing(int32_t Indx, Color_t Clr) {
 }
 
 void MixToBuf(Color_t Clr, int32_t Brt, int32_t Indx) {
-    Printf("%u\r", Brt);
+//    Printf("%u\r", Brt);
     SetColorRing(Indx, Color_t(FLASH_CLR, BACK_CLR, Brt));
 }
 
