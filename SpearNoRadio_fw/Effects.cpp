@@ -15,13 +15,9 @@
 
 extern Neopixels_t Leds;
 
+#define BACK_CLR        (Color_t(255, 117, 0))
 // On-off layer
 #define SMOOTH_VAR      720
-
-// Flash
-#define BACK_CLR        (Color_t(255, 207, 0))
-#define FLASH_CLR       (Color_t(255, 255, 255))
-#define FLASH_CNT       2
 
 // Do not touch
 #define BRT_MAX     255L
@@ -38,36 +34,52 @@ static void SetColorRing(int32_t Indx, Color_t Clr) {
 
 void MixToBuf(Color_t Clr, int32_t Brt, int32_t Indx) {
 //    Printf("%u\r", Brt);
-    SetColorRing(Indx, Color_t(FLASH_CLR, BACK_CLR, Brt));
+    SetColorRing(Indx, Color_t(Clr, BACK_CLR, Brt));
 }
 
 #if 1 // ======= Flash =======
+#define FLASH_DELAY_BEFORE_ms   900
+#define FLASH_CLR       (Color_t(255, 99, 180))
+#define FLASH_CNT       1
+void FlashTmrCallback(void *p);
+
 class Flash_t {
 private:
-    systime_t IStart = 0;
-    Color_t Clr = FLASH_CLR;
     int32_t IndxStart, Len;
-    uint32_t Delay_ms = 63;  // Delay between updates
-public:
-    void Generate() {
-        Delay_ms = Random::Generate(27, 99);
-        IndxStart = -1;
-        Len = 4; // XXX Randomize
+    uint32_t DelayUpd_ms = 63;  // Delay between updates
+    virtual_timer_t ITmr;
+    void StartTimerI(uint32_t ms) {
+        chVTSetI(&ITmr, TIME_MS2I(ms), FlashTmrCallback, this);
     }
-    void Update() {
-        // Check if time to move
-        if(TIME_I2MS(chVTTimeElapsedSinceX(IStart)) >= Delay_ms) {
-            IndxStart++;
-            IStart = chVTGetSystemTimeX();
-        }
-        // Check if path completed
-        if((IndxStart - Len) > (PIX_PER_BAND + 7)) Generate();
-        // Draw it
+public:
+    Color_t Clr = FLASH_CLR;
+    void Apply() {
         for(int32_t i=0; i<Len; i++) {
             MixToBuf(Clr, ((BRT_MAX * (Len - i)) / Len), IndxStart - i);
         }
     }
+
+    void GenerateI() {
+        DelayUpd_ms = Random::Generate(36, 63);
+        IndxStart = -12;
+        Len = 11;
+        // Start delay before
+        StartTimerI(FLASH_DELAY_BEFORE_ms);
+    }
+
+    void OnTmrI() {
+        IndxStart++; // Time to move
+        // Check if path completed
+        if((IndxStart - Len) > (PIX_PER_BAND + 7)) GenerateI();
+        else StartTimerI(DelayUpd_ms);
+    }
 };
+
+void FlashTmrCallback(void *p) {
+    chSysLockFromISR();
+    ((Flash_t*)p)->OnTmrI();
+    chSysUnlockFromISR();
+}
 
 Flash_t FlashBuf[FLASH_CNT];
 #endif
@@ -107,7 +119,7 @@ public:
         chSysUnlock();
     }
 
-    void UpdateI() {
+    void OnTmrI() {
         switch(State) {
             case stFadingIn:
                 if(Brt == BRT_MAX) {
@@ -138,7 +150,7 @@ public:
 
 void OnOffTmrCallback(void *p) {
     chSysLockFromISR();
-    OnOffLayer.UpdateI();
+    OnOffLayer.OnTmrI();
     chSysUnlockFromISR();
 }
 #endif
@@ -149,11 +161,11 @@ __noreturn
 static void NpxThread(void *arg) {
     chRegSetThreadName("Npx");
     while(true) {
-        chThdSleepMilliseconds(18);
+        chThdSleepMilliseconds(9);
         // Reset colors
         Leds.SetAll(BACK_CLR);
         // Iterate flashes
-        for(Flash_t &IFlash : FlashBuf) IFlash.Update();
+        for(Flash_t &IFlash : FlashBuf) IFlash.Apply();
         // Process OnOff
         OnOffLayer.Apply();
         // Show it
@@ -163,7 +175,11 @@ static void NpxThread(void *arg) {
 
 
 void EffInit() {
-    for(Flash_t &IFlash : FlashBuf) IFlash.Generate();
+    for(Flash_t &IFlash : FlashBuf) {
+        chSysLock();
+        IFlash.GenerateI();
+        chSysUnlock();
+    }
     chThdCreateStatic(waNpxThread, sizeof(waNpxThread), NORMALPRIO, (tfunc_t)NpxThread, nullptr);
 }
 
