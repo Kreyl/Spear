@@ -4,6 +4,10 @@
 #define BOARD_NAME          "Spear01"
 #define APP_NAME            "Staff"
 
+#ifndef TRUE
+#define TRUE    1
+#endif
+
 // ==== High-level peripery control ====
 #define PILL_ENABLED        FALSE
 #define BEEPER_ENABLED      FALSE
@@ -15,10 +19,10 @@
 #define STM32L151xB
 
 // Freq of external crystal if any. Leave it here even if not used.
-#define CRYSTAL_FREQ_HZ     12000000
+#define CRYSTAL_FREQ_HZ 12000000
 
-#define SYS_TIM_CLK         (Clk.APB1FreqHz)
-#define ADC_REQUIRED        FALSE
+#define SYS_TIM_CLK     (Clk.APB1FreqHz)
+#define ADC_REQUIRED    TRUE
 
 // LEDs config
 #define PIX_PER_BAND    30
@@ -41,23 +45,20 @@
 #define NPX_DATA_PIN    GPIOA, 7, AF5
 #define NPX_PWR_PIN     GPIOA, 6
 
+// ADC
+#define ADC_BAT_EN      GPIOB, 2
+#define ADC_BAT_PIN     GPIOB, 1
+
 #endif // GPIO
 
 #if ADC_REQUIRED // ======================= Inner ADC ==========================
-// Clock divider: clock is generated from the APB2
-#define ADC_CLK_DIVIDER     adcDiv2
-
-// ADC channels
-//#define BAT_CHNL          1
-
+#define BAT_CHNL            9
 #define ADC_VREFINT_CHNL    17  // All 4xx, F072 and L151 devices. Do not change.
-#define ADC_CHANNELS        { ADC_VREFINT_CHNL }
-#define ADC_CHANNEL_CNT     1   // Do not use countof(AdcChannels) as preprocessor does not know what is countof => cannot check
+#define ADC_CHANNELS        { BAT_CHNL, ADC_VREFINT_CHNL }
+#define ADC_CHANNEL_CNT     2   // Do not use countof(AdcChannels) as preprocessor does not know what is countof => cannot check
 #define ADC_SAMPLE_TIME     ast96Cycles
 #define ADC_SAMPLE_CNT      8   // How many times to measure every channel
-
 #define ADC_SEQ_LEN         (ADC_SAMPLE_CNT * ADC_CHANNEL_CNT)
-
 #endif
 
 #if 1 // =========================== DMA =======================================
@@ -73,7 +74,7 @@
 #define NPX_DMA         STM32_DMA_STREAM_ID(1, 3)  // SPI1 TX
 
 #if ADC_REQUIRED
-#define ADC_DMA         STM32_DMA1_STREAM1
+#define ADC_DMA         STM32_DMA_STREAM_ID(1, 1)
 #define ADC_DMA_MODE    STM32_DMA_CR_CHSEL(0) |   /* dummy */ \
                         DMA_PRIORITY_LOW | \
                         STM32_DMA_CR_MSIZE_HWORD | \

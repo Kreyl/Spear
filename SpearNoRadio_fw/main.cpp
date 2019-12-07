@@ -8,6 +8,7 @@
 #include "ws2812b.h"
 #include "color.h"
 #include "Effects.h"
+#include "kl_adc.h"
 
 #if 1 // ======================== Variables and defines ========================
 // Forever
@@ -18,6 +19,10 @@ static void ITask();
 static void OnCmd(Shell_t *PShell);
 static void EnterSleep();
 bool IsEnteringSleep = false;
+
+// Measure battery periodically
+static TmrKL_t TmrOneSecond {TIME_MS2I(999), evtIdEverySecond, tktPeriodic};
+static void OnMeasurementDone();
 
 // LEDs
 static const NeopixelParams_t NpxParams {NPX_SPI, NPX_DATA_PIN, NPX_DMA, NPX_DMA_MODE(0)};
@@ -51,17 +56,23 @@ int main(void) {
     SimpleSensors::Init();
 #endif
 
+    // ADC
+    PinSetupOut(ADC_BAT_EN, omPushPull);
+    PinSetHi(ADC_BAT_EN); // Enable it forever, as 200k produces ignorable current
+    PinSetupAnalog(ADC_BAT_PIN);
+    Adc.Init();
+    TmrOneSecond.StartOrRestart();
+
     // ==== Leds ====
     Leds.Init();
-//    Leds.SetAll(clGreen);
-//    Leds.SetCurrentColors();
-
-    // Pwr pin
+    // LED pwr pin
     PinSetupOut(NPX_PWR_PIN, omPushPull);
     PinSetHi(NPX_PWR_PIN);
 
     EffInit();
     EffFadeIn();
+//    Leds.SetAll(clGreen);
+//    Leds.SetCurrentColors();
 
     // Main cycle
     ITask();
@@ -85,6 +96,9 @@ void ITask() {
 #endif
             case evtIdFadeOutDone: EnterSleep(); break;
 
+            case evtIdEverySecond: Adc.StartMeasurement(); break;
+            case evtIdAdcRslt: OnMeasurementDone(); break;
+
             case evtIdShellCmd:
                 OnCmd((Shell_t*)Msg.Ptr);
                 ((Shell_t*)Msg.Ptr)->SignalCmdProcessed();
@@ -93,6 +107,23 @@ void ITask() {
         } // Switch
     } // while true
 } // ITask()
+
+void OnMeasurementDone() {
+//    Printf("AdcDone\r");
+    if(Adc.FirstConversion) Adc.FirstConversion = false;
+    else {
+        uint32_t VRef_adc = Adc.GetResult(ADC_VREFINT_CHNL);
+        uint32_t Vadc = Adc.GetResult(BAT_CHNL);
+        uint32_t Vmv = Adc.Adc2mV(Vadc, VRef_adc);
+//        Printf("VrefAdc=%u; Vadc=%u; Vmv=%u\r", VRef_adc, Vadc, Vmv);
+        uint32_t Battery_mV = Vmv * 2; // Resistor divider
+//        Printf("Vbat=%u\r", Battery_mV);
+        if(Battery_mV < 2800) {
+            Printf("Discharged\r");
+            EnterSleep();
+        }
+    }
+}
 
 void EnterSleep() {
     Printf("Entering sleep\r");
