@@ -15,7 +15,7 @@
 
 extern Neopixels_t Leds;
 
-#define BACK_CLR        (Color_t(255, 117, 0))
+#define BACK_CLR        (Color_t(255, 153, 0))
 // On-off layer
 #define SMOOTH_VAR      720
 
@@ -39,7 +39,7 @@ void MixToBuf(Color_t Clr, int32_t Brt, int32_t Indx) {
 
 #if 1 // ======= Flash =======
 #define FLASH_DELAY_BEFORE_ms   900
-#define FLASH_CLR       (Color_t(255, 99, 180))
+#define FLASH_CLR       (Color_t(255, 153, 180))
 #define FLASH_CNT       1
 void FlashTmrCallback(void *p);
 
@@ -99,7 +99,8 @@ public:
     void Apply() {
         if(State == stIdle) return; // No movement here
         for(uint32_t i=0; i<LED_CNT; i++) {
-            ColorHSV_t ClrH(Leds.ClrBuf[i]);
+            ColorHSV_t ClrH;
+            ClrH.FromRGB(Leds.ClrBuf[i]);
             ClrH.V = (ClrH.V * Brt) / BRT_MAX;
             Leds.ClrBuf[i].FromHSV(ClrH.H, ClrH.S, ClrH.V);
         }

@@ -21,7 +21,11 @@
 // Freq of external crystal if any. Leave it here even if not used.
 #define CRYSTAL_FREQ_HZ 12000000
 
-#define SYS_TIM_CLK     (Clk.APB1FreqHz)
+// OS timer settings
+#define STM32_ST_IRQ_PRIORITY   2
+#define STM32_ST_USE_TIMER      2
+#define STM32_TIMCLK1           (Clk.APB1FreqHz)
+
 #define ADC_REQUIRED    TRUE
 
 // LEDs config
