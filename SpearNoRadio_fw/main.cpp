@@ -53,13 +53,15 @@ int main(void) {
 
     // ==== Leds ====
     Leds.Init();
-    Leds.SetAll(clGreen);
+//    Leds.SetAll(clGreen);
+//    Leds.SetCurrentColors();
+
     // Pwr pin
     PinSetupOut(NPX_PWR_PIN, omPushPull);
     PinSetHi(NPX_PWR_PIN);
 
     EffInit();
-    EffFlashStart();
+    EffFadeIn();
 
     // Main cycle
     ITask();
@@ -76,11 +78,12 @@ void ITask() {
                 Printf("Btn %u\r", Msg.BtnEvtInfo.Type);
                 if(Msg.BtnEvtInfo.Type == beShortPress) {
                     IsEnteringSleep = !IsEnteringSleep;
-                    chThdSleepMilliseconds(999);
-                    EnterSleep();
+                    if(IsEnteringSleep) EffFadeOut();
+                    else EffFadeIn();
                 }
                 break;
 #endif
+            case evtIdFadeOutDone: EnterSleep(); break;
 
             case evtIdShellCmd:
                 OnCmd((Shell_t*)Msg.Ptr);
@@ -93,6 +96,7 @@ void ITask() {
 
 void EnterSleep() {
     Printf("Entering sleep\r");
+    PinSetLo(NPX_PWR_PIN);
     chThdSleepMilliseconds(45);
     chSysLock();
     Sleep::EnableWakeup1Pin();

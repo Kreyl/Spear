@@ -381,6 +381,7 @@ struct ColorHSV_t {
     bool operator != (const ColorHSV_t &AColor) const { return (DWord32 != AColor.DWord32); }
 
     ColorHSV_t() : H(0), S(0), V(0) {}
+    ColorHSV_t(const Color_t &Clr) { FromRGB(Clr); }
     ColorHSV_t(uint16_t AH, uint8_t AS, uint8_t AV) : H(AH), S(AS), V(AV) {}
     ColorHSV_t(const ColorHSV_t &AClr) : H(AClr.H), S(AClr.S), V(AClr.V) {}
 } __attribute__((packed));

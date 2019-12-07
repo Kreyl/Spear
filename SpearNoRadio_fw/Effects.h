@@ -8,4 +8,6 @@
 #pragma once
 
 void EffInit();
-void EffFlashStart();
+
+void EffFadeIn();
+void EffFadeOut();

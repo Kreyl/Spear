@@ -20,6 +20,11 @@
 #define SYS_TIM_CLK         (Clk.APB1FreqHz)
 #define ADC_REQUIRED        FALSE
 
+// LEDs config
+#define PIX_PER_BAND    30
+#define BAND_NUMBER     3
+#define LED_CNT         (PIX_PER_BAND * BAND_NUMBER)
+
 #if 1 // ========================== GPIO =======================================
 // PortMinTim_t: GPIO, Pin, Tim, TimChnl, invInverted, omPushPull, TopValue
 // UART
