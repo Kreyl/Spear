@@ -69,8 +69,8 @@ int main(void) {
     PinSetupOut(NPX_PWR_PIN, omPushPull);
     PinSetHi(NPX_PWR_PIN);
 
-    EffInit();
-    EffFadeIn();
+    Eff::Init();
+    Eff::FadeIn();
 //    Leds.SetAll(clGreen);
 //    Leds.SetCurrentColors();
 
@@ -89,12 +89,15 @@ void ITask() {
                 Printf("Btn %u\r", Msg.BtnEvtInfo.Type);
                 if(Msg.BtnEvtInfo.Type == beShortPress) {
                     IsEnteringSleep = !IsEnteringSleep;
-                    if(IsEnteringSleep) EffFadeOut();
-                    else EffFadeIn();
+                    if(IsEnteringSleep) Eff::FadeOut();
+                    else Eff::FadeIn();
                 }
                 break;
 #endif
             case evtIdFadeOutDone: EnterSleep(); break;
+            case evtIdFadeInDone: break;
+
+            case evtIdIsCharging: break;
 
             case evtIdEverySecond: Adc.StartMeasurement(); break;
             case evtIdAdcRslt: OnMeasurementDone(); break;
@@ -107,6 +110,13 @@ void ITask() {
         } // Switch
     } // while true
 } // ITask()
+
+void ProcessIsCharging(PinSnsState_t *PState, uint32_t Len) {
+    if(*PState == pssLo) {
+        Printf("Charging\r");
+        EnterSleep();
+    }
+}
 
 void OnMeasurementDone() {
 //    Printf("AdcDone\r");

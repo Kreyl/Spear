@@ -174,8 +174,8 @@ static void NpxThread(void *arg) {
     }
 }
 
-
-void EffInit() {
+namespace Eff {
+void Init() {
     for(Flash_t &IFlash : FlashBuf) {
         chSysLock();
         IFlash.GenerateI();
@@ -184,5 +184,7 @@ void EffInit() {
     chThdCreateStatic(waNpxThread, sizeof(waNpxThread), NORMALPRIO, (tfunc_t)NpxThread, nullptr);
 }
 
-void EffFadeIn()  { OnOffLayer.FadeIn();  }
-void EffFadeOut() { OnOffLayer.FadeOut(); }
+void FadeIn()  { OnOffLayer.FadeIn();  }
+void FadeOut() { OnOffLayer.FadeOut(); }
+
+} // namespace

@@ -44,6 +44,9 @@
 #define BTN1_PIN        GPIOA, 0, pudPullDown
 #define BTN2_PIN        GPIOA, 1, pudPullDown
 
+// Charging
+#define IS_CHARGING_PIN GPIOA, 2, pudPullUp
+
 // Npx LEDs
 #define NPX_SPI         SPI1
 #define NPX_DATA_PIN    GPIOA, 7, AF5
