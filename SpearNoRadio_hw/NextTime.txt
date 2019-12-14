@@ -1,0 +1,6 @@
+v1 -> v2
+1) * Connect PA6 and PA7 (MOSI1 & MISO1) to allow slave SPI operation.
+2) * Connect PA3 and PA5 (TIM9C2 and SCK1) to allow SCK generation by TIM9
+3) + Add USB detection
+4) + Add LED to indicate non-sleeping state
+5) Make it longer. Battery is way longer anyway.

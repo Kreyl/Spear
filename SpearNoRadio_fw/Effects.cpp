@@ -15,9 +15,9 @@
 
 extern Neopixels_t Leds;
 
-#define BACK_CLR        (Color_t(0, 0, 0))
+#define BACK_CLR        (Color_t(255, 22, 0))
 // On-off layer
-#define SMOOTH_VAR      720
+#define SMOOTH_VAR      180
 
 // Do not touch
 #define BRT_MAX     255L
@@ -44,8 +44,8 @@ void MixToBuf(Color_t Clr, int32_t Brt, int32_t Indx) {
 
 #if 1 // ======= Flash =======
 #define FLASH_DELAY_BEFORE_ms   900
-#define FLASH_CLR       (Color_t(255, 0, 0))
-#define FLASH_CNT       1
+#define FLASH_CLR       (Color_t(0, 0, 0))
+#define FLASH_CNT       2
 void FlashTmrCallback(void *p);
 
 class Flash_t {
@@ -57,7 +57,7 @@ private:
         chVTSetI(&ITmr, TIME_MS2I(ms), FlashTmrCallback, this);
     }
 public:
-    int32_t EndIndx = 38; // which Indx to touch to consider flash ends XXX not good
+    int32_t EndIndx = 31; // which Indx to touch to consider flash ends XXX not good
     Color_t Clr = FLASH_CLR;
     void Apply() {
         for(int32_t i=0; i<Len; i++) {
@@ -65,18 +65,18 @@ public:
         }
     }
 
-    void GenerateI() {
-        DelayUpd_ms = Random::Generate(36, 63);
-        IndxStart = -12;
+    void GenerateI(uint32_t DelayBefore_ms) {
+        DelayUpd_ms = 54; // Random::Generate(36, 63);
+        IndxStart = -1;
         Len = 11;
         // Start delay before
-        StartTimerI(FLASH_DELAY_BEFORE_ms);
+        StartTimerI(DelayBefore_ms);
     }
 
     void OnTmrI() {
         IndxStart++; // Time to move
         // Check if path completed
-        if((IndxStart - Len) > EndIndx) GenerateI();
+        if((IndxStart - Len) > EndIndx) GenerateI(FLASH_DELAY_BEFORE_ms);
         else StartTimerI(DelayUpd_ms);
     }
 };
@@ -182,9 +182,9 @@ static void NpxThread(void *arg) {
 
 namespace Eff {
 void Init() {
-    for(Flash_t &IFlash : FlashBuf) {
+    for(uint32_t i=0; i<FLASH_CNT; i++) {
         chSysLock();
-        IFlash.GenerateI();
+        FlashBuf[i].GenerateI(i * 999 + 180);
         chSysUnlock();
     }
     chThdCreateStatic(waNpxThread, sizeof(waNpxThread), NORMALPRIO, (tfunc_t)NpxThread, nullptr);
