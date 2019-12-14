@@ -15,7 +15,7 @@
 
 extern Neopixels_t Leds;
 
-#define BACK_CLR        (Color_t(255, 22, 0))
+#define BACK_CLR        (Color_t(0, 0, 0))
 // On-off layer
 #define SMOOTH_VAR      180
 
@@ -43,21 +43,20 @@ void MixToBuf(Color_t Clr, int32_t Brt, int32_t Indx) {
 }
 
 #if 1 // ======= Flash =======
-#define FLASH_DELAY_BEFORE_ms   900
-#define FLASH_CLR       (Color_t(0, 0, 0))
-#define FLASH_CNT       2
+#define FLASH_CLR       (Color_t(0, 255, 9))
+#define FLASH_CNT       3
 void FlashTmrCallback(void *p);
 
 class Flash_t {
 private:
     int32_t IndxStart, Len;
-    uint32_t DelayUpd_ms = 63;  // Delay between updates
+    uint32_t DelayUpd_ms;  // Delay between updates
     virtual_timer_t ITmr;
     void StartTimerI(uint32_t ms) {
         chVTSetI(&ITmr, TIME_MS2I(ms), FlashTmrCallback, this);
     }
 public:
-    int32_t EndIndx = 31; // which Indx to touch to consider flash ends XXX not good
+    int32_t EndIndx = 24; // which Indx to touch to consider flash ends XXX not good
     Color_t Clr = FLASH_CLR;
     void Apply() {
         for(int32_t i=0; i<Len; i++) {
@@ -66,9 +65,11 @@ public:
     }
 
     void GenerateI(uint32_t DelayBefore_ms) {
-        DelayUpd_ms = 54; // Random::Generate(36, 63);
+        DelayUpd_ms = 90; // Random::Generate(36, 63);
         IndxStart = -1;
-        Len = 11;
+//        Len = 14;
+        Len = Random::Generate(11, 18);
+//        Len = Random::Generate(14, 18);
         // Start delay before
         StartTimerI(DelayBefore_ms);
     }
@@ -76,7 +77,7 @@ public:
     void OnTmrI() {
         IndxStart++; // Time to move
         // Check if path completed
-        if((IndxStart - Len) > EndIndx) GenerateI(FLASH_DELAY_BEFORE_ms);
+        if((IndxStart - Len) > EndIndx) GenerateI(18);
         else StartTimerI(DelayUpd_ms);
     }
 };
@@ -184,7 +185,7 @@ namespace Eff {
 void Init() {
     for(uint32_t i=0; i<FLASH_CNT; i++) {
         chSysLock();
-        FlashBuf[i].GenerateI(i * 999 + 180);
+        FlashBuf[i].GenerateI(i * 1170 + 9);
         chSysUnlock();
     }
     chThdCreateStatic(waNpxThread, sizeof(waNpxThread), NORMALPRIO, (tfunc_t)NpxThread, nullptr);

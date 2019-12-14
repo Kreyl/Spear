@@ -29,12 +29,9 @@
 #define ADC_REQUIRED    TRUE
 
 // LEDs config: BandCnt; {LedCnt1, LedCnt2, LedCnt3...}
-#define BAND_CNT        4
+#define BAND_CNT        1
 #define BAND_SETUPS     ((const BandSetup_t[]){\
-    {31, dirForward}, \
-    {18, dirForward}, \
-    {18, dirBackward}, \
-    {31, dirForward}, \
+    {24, dirForward}, \
     })
 
 #if 1 // ========================== GPIO =======================================
