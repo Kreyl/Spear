@@ -26,7 +26,7 @@ static void OnMeasurementDone();
 
 // LEDs
 static const NeopixelParams_t NpxParams {NPX_SPI, NPX_DATA_PIN, NPX_DMA, NPX_DMA_MODE(0)};
-Neopixels_t Leds{&NpxParams};
+Neopixels_t Leds{&NpxParams, BAND_CNT, BAND_SETUPS};
 #endif
 
 int main(void) {

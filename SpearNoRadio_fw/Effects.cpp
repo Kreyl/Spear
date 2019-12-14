@@ -1,7 +1,7 @@
 /*
  * Effects.cpp
  *
- *  Created on: 5 ???. 2019 ?.
+ *  Created on: 5 dec 2019
  *      Author: Kreyl
  */
 
@@ -15,7 +15,7 @@
 
 extern Neopixels_t Leds;
 
-#define BACK_CLR        (Color_t(255, 153, 0))
+#define BACK_CLR        (Color_t(0, 0, 0))
 // On-off layer
 #define SMOOTH_VAR      720
 
@@ -23,12 +23,17 @@ extern Neopixels_t Leds;
 #define BRT_MAX     255L
 
 static void SetColorRing(int32_t Indx, Color_t Clr) {
-    if(Indx >= PIX_PER_BAND or Indx < 0) return;
-    Leds.ClrBuf[Indx] = Clr;   // Always for first chunk
-    // Iterate bands
-    for(int32_t n=2; n <= BAND_NUMBER; n++) {
-        int32_t i = (n & 1)? (PIX_PER_BAND * (n-1) + Indx) : (PIX_PER_BAND * n - 1 - Indx);
-        Leds.ClrBuf[i] = Clr;
+    if(Indx < 0) return;
+    int32_t NStart = 0;
+    for(int32_t n=0; n < Leds.BandCnt; n++) { // Iterate bands
+        int32_t Length = Leds.BandSetup[n].Length; // to make things shorter
+        if(Indx < Length) {
+            uint32_t i;
+            if(Leds.BandSetup[n].Dir == dirForward) i = NStart + Indx;
+            else i = NStart + Length - 1 - Indx;
+            Leds.ClrBuf[i] = Clr;
+        }
+        NStart += Length; // Calculate start indx of next band
     }
 }
 
@@ -39,7 +44,7 @@ void MixToBuf(Color_t Clr, int32_t Brt, int32_t Indx) {
 
 #if 1 // ======= Flash =======
 #define FLASH_DELAY_BEFORE_ms   900
-#define FLASH_CLR       (Color_t(255, 153, 180))
+#define FLASH_CLR       (Color_t(255, 0, 0))
 #define FLASH_CNT       1
 void FlashTmrCallback(void *p);
 
@@ -52,6 +57,7 @@ private:
         chVTSetI(&ITmr, TIME_MS2I(ms), FlashTmrCallback, this);
     }
 public:
+    int32_t EndIndx = 38; // which Indx to touch to consider flash ends XXX not good
     Color_t Clr = FLASH_CLR;
     void Apply() {
         for(int32_t i=0; i<Len; i++) {
@@ -70,7 +76,7 @@ public:
     void OnTmrI() {
         IndxStart++; // Time to move
         // Check if path completed
-        if((IndxStart - Len) > (PIX_PER_BAND + 7)) GenerateI();
+        if((IndxStart - Len) > EndIndx) GenerateI();
         else StartTimerI(DelayUpd_ms);
     }
 };
@@ -98,7 +104,7 @@ private:
 public:
     void Apply() {
         if(State == stIdle) return; // No movement here
-        for(uint32_t i=0; i<LED_CNT; i++) {
+        for(int32_t i=0; i<Leds.LedCntTotal; i++) {
             ColorHSV_t ClrH;
             ClrH.FromRGB(Leds.ClrBuf[i]);
             ClrH.V = (ClrH.V * Brt) / BRT_MAX;

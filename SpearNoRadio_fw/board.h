@@ -2,7 +2,7 @@
 
 // ==== General ====
 #define BOARD_NAME          "Spear01"
-#define APP_NAME            "Staff"
+#define APP_NAME            "StaffDark1"
 
 #ifndef TRUE
 #define TRUE    1
@@ -28,10 +28,14 @@
 
 #define ADC_REQUIRED    TRUE
 
-// LEDs config
-#define PIX_PER_BAND    30
-#define BAND_NUMBER     3
-#define LED_CNT         (PIX_PER_BAND * BAND_NUMBER)
+// LEDs config: BandCnt; {LedCnt1, LedCnt2, LedCnt3...}
+#define BAND_CNT        4
+#define BAND_SETUPS     ((const BandSetup_t[]){\
+    {31, dirForward}, \
+    {18, dirForward}, \
+    {18, dirBackward}, \
+    {31, dirForward}, \
+    })
 
 #if 1 // ========================== GPIO =======================================
 // PortMinTim_t: GPIO, Pin, Tim, TimChnl, invInverted, omPushPull, TopValue
