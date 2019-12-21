@@ -4,3 +4,5 @@ v1 -> v2
 3) + Add USB detection
 4) + Add LED to indicate non-sleeping state
 5) Make it longer. Battery is way longer anyway.
+6) * Fix USB shield connection
+7) * Fix button connection
