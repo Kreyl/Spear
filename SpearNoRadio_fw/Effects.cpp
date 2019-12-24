@@ -15,7 +15,7 @@
 
 extern Neopixels_t Leds;
 
-#define BACK_CLR        (Color_t(0, 0, 0))
+#define BACK_CLR        (Color_t(255, 255, 153))
 // On-off layer
 #define SMOOTH_VAR      180
 
@@ -43,8 +43,8 @@ void MixToBuf(Color_t Clr, int32_t Brt, int32_t Indx) {
 }
 
 #if 1 // ======= Flash =======
-#define FLASH_CLR       (Color_t(0, 255, 9))
-#define FLASH_CNT       3
+#define FLASH_CLR       (Color_t(63, 63, 255))
+#define FLASH_CNT       2
 void FlashTmrCallback(void *p);
 
 class Flash_t {
@@ -65,10 +65,10 @@ public:
     }
 
     void GenerateI(uint32_t DelayBefore_ms) {
-        DelayUpd_ms = 90; // Random::Generate(36, 63);
+        DelayUpd_ms = Random::Generate(36, 63);
         IndxStart = -1;
-//        Len = 14;
-        Len = Random::Generate(11, 18);
+        Len = 4;
+//        Len = Random::Generate(11, 18);
 //        Len = Random::Generate(14, 18);
         // Start delay before
         StartTimerI(DelayBefore_ms);
@@ -77,7 +77,10 @@ public:
     void OnTmrI() {
         IndxStart++; // Time to move
         // Check if path completed
-        if((IndxStart - Len) > EndIndx) GenerateI(18);
+        if((IndxStart - Len) > EndIndx) {
+//            GenerateI(450);
+            GenerateI(Random::Generate(630, 1800));
+        }
         else StartTimerI(DelayUpd_ms);
     }
 };
@@ -169,7 +172,7 @@ __noreturn
 static void NpxThread(void *arg) {
     chRegSetThreadName("Npx");
     while(true) {
-        chThdSleepMilliseconds(9);
+        chThdSleepMilliseconds(7);
         // Reset colors
         Leds.SetAll(BACK_CLR);
         // Iterate flashes
@@ -185,7 +188,7 @@ namespace Eff {
 void Init() {
     for(uint32_t i=0; i<FLASH_CNT; i++) {
         chSysLock();
-        FlashBuf[i].GenerateI(i * 1170 + 9);
+        FlashBuf[i].GenerateI(i * 450 + 9);
         chSysUnlock();
     }
     chThdCreateStatic(waNpxThread, sizeof(waNpxThread), NORMALPRIO, (tfunc_t)NpxThread, nullptr);

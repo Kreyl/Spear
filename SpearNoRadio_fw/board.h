@@ -28,11 +28,12 @@
 
 #define ADC_REQUIRED    TRUE
 
-// LEDs config: BandCnt; {LedCnt1, LedCnt2, LedCnt3...}
-#define BAND_CNT        1
+// LEDs config
 #define BAND_SETUPS     ((const BandSetup_t[]){\
-    {24, dirForward}, \
+    {15, dirForward}, \
+    {15, dirBackward}, \
     })
+#define BAND_CNT        (countof(BAND_SETUPS))
 
 #if 1 // ========================== GPIO =======================================
 // PortMinTim_t: GPIO, Pin, Tim, TimChnl, invInverted, omPushPull, TopValue
