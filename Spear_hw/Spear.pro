@@ -1,4 +1,4 @@
-update=10.11.2019 20:58:11
+update=21.03.2020 21:39:37
 version=1
 last_client=kicad
 [general]
@@ -12,6 +12,10 @@ NetIExt=net
 version=1
 LibDir=
 [eeschema/libraries]
+[ModEditFrame]
+version=1
+[sheetnames]
+1=00000000-0000-0000-0000-00005e7521fb:
 [pcbnew]
 version=1
 PageLayoutDescrFile=
@@ -25,17 +29,17 @@ CopperLayerCount=4
 BoardThickness=1.6
 AllowMicroVias=0
 AllowBlindVias=0
-RequireCourtyardDefinitions=0
-ProhibitOverlappingCourtyards=1
 MinTrackWidth=0.15
-MinViaDiameter=0.4
+MinViaDiameter=0.6
 MinViaDrill=0.3
 MinMicroViaDiameter=0.2
 MinMicroViaDrill=0.09999999999999999
 MinHoleToHole=0.25
+RequireCourtyardDefinitions=0
+ProhibitOverlappingCourtyards=1
 CopperEdgeClearance=0.01
 TrackWidth1=0.18
-ViaDiameter1=0.65
+ViaDiameter1=0.6
 ViaDrill1=0.3
 dPairWidth1=0.2
 dPairGap1=0.25
@@ -237,7 +241,7 @@ Enabled=0
 Name=Default
 Clearance=0.18
 TrackWidth=0.18
-ViaDiameter=0.65
+ViaDiameter=0.6
 ViaDrill=0.3
 uViaDiameter=0.3
 uViaDrill=0.1
@@ -248,7 +252,7 @@ dPairViaGap=0.25
 Name=Wide
 Clearance=0.18
 TrackWidth=0.5
-ViaDiameter=0.65
+ViaDiameter=0.6
 ViaDrill=0.3
 uViaDiameter=0.3
 uViaDrill=0.1

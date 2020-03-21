@@ -1,20 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--*****************************************-->
-<!--   File    : Spear.fsproj                -->
-<!--   Format  : TopoR Project file          -->
-<!--   Version : 2                           -->
-<!--   Program : TopoR 8 Layer 7.0.18661     -->
-<!--   Date    : Thursday, November 14, 2019 -->
-<!--   Time    : 23:26                       -->
-<!--*****************************************-->
+<!--**************************************-->
+<!--   File    : Spear.fsproj             -->
+<!--   Format  : TopoR Project file       -->
+<!--   Version : 2                        -->
+<!--   Program : TopoR 8 Layer 7.0.18661  -->
+<!--   Date    : Saturday, March 21, 2020 -->
+<!--   Time    : 20:11                    -->
+<!--**************************************-->
 
 <Project>
    <Version current="2"/>
-   <GUID>{66F5B939-72F9-4B00-A3F8-CD6C0B502CC1}</GUID>
+   <GUID>{A128A9FC-5C0E-4A8A-9251-2A713C6C9FAB}</GUID>
    <Documents>
-      <Section name="PCB" isExpanded="false">
-         <File path=".\Spear.fsx" isopened="1" dateChange="2019-11-11 00:28:16"/>
+      <Section name="PCB" isExpanded="true">
+         <File path=".\Spear.fsx" isopened="1" dateChange="2020-03-21 15:17:39"/>
       </Section>
       <Section name="AutoRouting" isExpanded="false"/>
    </Documents>
+   <Import>
+      <Specctra>
+         <Path name="D:\Nute\MagicThings\Spear\SpearNoRadio_hw\Spear.dsn"/>
+         <Path name="D:\Nute\MagicThings\Spear\Spear_hw\Spear.dsn"/>
+      </Specctra>
+   </Import>
 </Project>
