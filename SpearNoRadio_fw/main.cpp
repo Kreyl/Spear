@@ -25,6 +25,8 @@ static TmrKL_t TmrOneSecond {TIME_MS2I(999), evtIdEverySecond, tktPeriodic};
 static void OnMeasurementDone();
 
 // LEDs
+ColorHSV_t hsv;
+TmrKL_t TmrSave {TIME_MS2I(3600), evtIdTimeToSave, tktOneShot};
 static const NeopixelParams_t NpxParams {NPX_SPI, NPX_DATA_PIN, NPX_DMA, NPX_DMA_MODE(0)};
 Neopixels_t Leds{&NpxParams, BAND_CNT, BAND_SETUPS};
 #endif
@@ -63,6 +65,13 @@ int main(void) {
     Adc.Init();
     TmrOneSecond.StartOrRestart();
 
+    // Load and check color
+//    Flash::Load((uint32_t*)&hsv, sizeof(ColorHSV_t));
+    hsv.DWord32 = EE::Read32(0);
+    if(hsv.H > 360) hsv.H = 120;
+    hsv.S = 100;
+    hsv.V = 100;
+
     // ==== Leds ====
     Leds.Init();
     // LED pwr pin
@@ -70,6 +79,7 @@ int main(void) {
     PinSetHi(NPX_PWR_PIN);
 
     Eff::Init();
+    Eff::SetColor(hsv.ToRGB());
     Eff::FadeIn();
 //    Leds.SetAll(clGreen);
 //    Leds.SetCurrentColors();
@@ -86,15 +96,34 @@ void ITask() {
 
 #if BUTTONS_ENABLED
             case evtIdButtons:
-                Printf("Btn %u\r", Msg.BtnEvtInfo.Type);
-                if(Msg.BtnEvtInfo.Type == beShortPress) {
-                    IsEnteringSleep = !IsEnteringSleep;
-                    if(IsEnteringSleep) Eff::FadeOut();
-                    else Eff::FadeIn();
+//                Printf("Btn %u\r", Msg.BtnEvtInfo.Type);
+//                if(Msg.BtnEvtInfo.Type == beShortPress) {
+//                    IsEnteringSleep = !IsEnteringSleep;
+//                    if(IsEnteringSleep) Eff::FadeOut();
+//                    else Eff::FadeIn();
+//                }
+                if(Msg.BtnEvtInfo.BtnID == 0) {
+                    if(hsv.H < 360) hsv.H++;
+                    else hsv.H = 0;
                 }
+                else if(Msg.BtnEvtInfo.BtnID == 1) {
+                    if(hsv.H > 0) hsv.H--;
+                    else hsv.H = 360;
+                }
+//                Printf("HSV %u; ", hsv.H);
+                Eff::SetColor(hsv.ToRGB());
+                // Prepare to save
+                TmrSave.StartOrRestart();
                 break;
 #endif
-            case evtIdFadeOutDone: EnterSleep(); break;
+            case evtIdTimeToSave:
+                EE::Write32(0, hsv.DWord32);
+                Eff::SetColor(clBlack);
+                chThdSleepMilliseconds(450);
+                Eff::SetColor(hsv.ToRGB());
+                break;
+
+            case evtIdFadeOutDone: /* EnterSleep(); */ break;
             case evtIdFadeInDone: break;
 
             case evtIdIsCharging: break;
@@ -155,6 +184,15 @@ void OnCmd(Shell_t *PShell) {
         PShell->Ack(retvOk);
     }
     else if(PCmd->NameIs("Version")) PShell->Print("%S %S\r", APP_NAME, XSTRINGIFY(BUILD_TIME));
+
+    else if(PCmd->NameIs("Clr")) {
+        uint8_t FClr[3];
+        if(PCmd->GetArray<uint8_t>(FClr, 3) == retvOk) {
+            Eff::SetColor(Color_t(FClr[0], FClr[1], FClr[2]));
+            PShell->Ack(retvOk);
+        }
+        else PShell->Ack(retvCmdError);
+    }
 
     else PShell->Ack(retvCmdUnknown);
 }

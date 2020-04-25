@@ -45,6 +45,8 @@ void MixToBuf(Color_t Clr, int32_t Brt, int32_t Indx) {
 #if 1 // ======= Flash =======
 #define FLASH_CLR       (Color_t(0, 255, 9))
 #define FLASH_CNT       3
+#define FLASH_END_INDX  11
+
 void FlashTmrCallback(void *p);
 
 class Flash_t {
@@ -55,8 +57,9 @@ private:
     void StartTimerI(uint32_t ms) {
         chVTSetI(&ITmr, TIME_MS2I(ms), FlashTmrCallback, this);
     }
+    systime_t strt;
 public:
-    int32_t EndIndx = 24; // which Indx to touch to consider flash ends XXX not good
+    int32_t EndIndx = FLASH_END_INDX; // which Indx to touch to consider flash ends
     Color_t Clr = FLASH_CLR;
     void Apply() {
         for(int32_t i=0; i<Len; i++) {
@@ -65,10 +68,12 @@ public:
     }
 
     void GenerateI(uint32_t DelayBefore_ms) {
+        PrintfI("%u Dur: %u\r", this, TIME_I2MS(chVTTimeElapsedSinceX(strt)));
+        strt = chVTGetSystemTimeX();
         DelayUpd_ms = 90; // Random::Generate(36, 63);
         IndxStart = -1;
-//        Len = 14;
-        Len = Random::Generate(11, 18);
+//        Len = 11;
+        Len = Random::Generate(9, 12);
 //        Len = Random::Generate(14, 18);
         // Start delay before
         StartTimerI(DelayBefore_ms);
@@ -185,10 +190,14 @@ namespace Eff {
 void Init() {
     for(uint32_t i=0; i<FLASH_CNT; i++) {
         chSysLock();
-        FlashBuf[i].GenerateI(i * 1170 + 9);
+        FlashBuf[i].GenerateI(i * 1107 + 9);
         chSysUnlock();
     }
     chThdCreateStatic(waNpxThread, sizeof(waNpxThread), NORMALPRIO, (tfunc_t)NpxThread, nullptr);
+}
+
+void SetColor(Color_t AClr) {
+    for(uint32_t i=0; i<FLASH_CNT; i++) FlashBuf[i].Clr = AClr;
 }
 
 void FadeIn()  { OnOffLayer.FadeIn();  }

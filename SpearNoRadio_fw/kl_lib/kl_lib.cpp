@@ -1462,8 +1462,7 @@ uint8_t Clk_t::SwitchToHSE() {
 
 // Enables HSE, enables PLL, switches to PLL
 uint8_t Clk_t::SwitchToPLL() {
-    if(EnableHSE() != 0) return 1;
-    if(EnablePLL() != 0) return 2;
+    if(EnablePLL() != 0) return 1;
     // Select PLL as system clock src
     RCC->CFGR |= RCC_CFGR_SW_PLL;
     // Wait until ready
@@ -1490,7 +1489,6 @@ uint8_t Clk_t::SetupPLLDividers(PllMul_t PllMul, PllDiv_t PllDiv) {
     tmp &= RCC_CFGR_PLLDIV | RCC_CFGR_PLLMUL;
     tmp |= ((uint32_t)PllDiv) << 22;
     tmp |= ((uint32_t)PllMul) << 18;
-    tmp |= RCC_CFGR_PLLSRC_HSE;
     RCC->CFGR = tmp;
     return 0;
 }

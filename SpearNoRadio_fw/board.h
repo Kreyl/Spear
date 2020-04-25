@@ -2,7 +2,7 @@
 
 // ==== General ====
 #define BOARD_NAME          "Spear01"
-#define APP_NAME            "StaffDark1"
+#define APP_NAME            "Orb1"
 
 #ifndef TRUE
 #define TRUE    1
@@ -31,7 +31,7 @@
 // LEDs config: BandCnt; {LedCnt1, LedCnt2, LedCnt3...}
 #define BAND_CNT        1
 #define BAND_SETUPS     ((const BandSetup_t[]){\
-    {24, dirForward}, \
+    {11, dirForward}, \
     })
 
 #if 1 // ========================== GPIO =======================================

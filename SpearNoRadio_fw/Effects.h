@@ -7,8 +7,12 @@
 
 #pragma once
 
+#include "color.h"
+
 namespace Eff {
 void Init();
+
+void SetColor(Color_t AClr);
 
 void FadeIn();
 void FadeOut();
