@@ -15,7 +15,8 @@
 
 extern Neopixels_t Leds;
 
-#define BACK_CLR        (Color_t(0, 0, 0))
+static Color_t BackClr;
+
 // On-off layer
 #define SMOOTH_VAR      180
 
@@ -39,7 +40,7 @@ static void SetColorRing(int32_t Indx, Color_t Clr) {
 
 void MixToBuf(Color_t Clr, int32_t Brt, int32_t Indx) {
 //    Printf("%u\r", Brt);
-    SetColorRing(Indx, Color_t(Clr, BACK_CLR, Brt));
+    SetColorRing(Indx, Color_t(Clr, BackClr, Brt));
 }
 
 #if 1 // ======= Flash =======
@@ -167,7 +168,7 @@ void OnOffTmrCallback(void *p) {
     chSysUnlockFromISR();
 }
 #endif
-
+/*
 // Thread
 static THD_WORKING_AREA(waNpxThread, 512);
 __noreturn
@@ -176,7 +177,7 @@ static void NpxThread(void *arg) {
     while(true) {
         chThdSleepMilliseconds(9);
         // Reset colors
-        Leds.SetAll(BACK_CLR);
+        Leds.SetAll(BackClr);
         // Iterate flashes
         for(Flash_t &IFlash : FlashBuf) IFlash.Apply();
         // Process OnOff
@@ -185,19 +186,31 @@ static void NpxThread(void *arg) {
         Leds.SetCurrentColors();
     }
 }
+*/
 
 namespace Eff {
 void Init() {
-    for(uint32_t i=0; i<FLASH_CNT; i++) {
-        chSysLock();
-        FlashBuf[i].GenerateI(i * 1107 + 9);
-        chSysUnlock();
-    }
-    chThdCreateStatic(waNpxThread, sizeof(waNpxThread), NORMALPRIO, (tfunc_t)NpxThread, nullptr);
+//    for(uint32_t i=0; i<FLASH_CNT; i++) {
+//        chSysLock();
+//        FlashBuf[i].GenerateI(i * 1107 + 9);
+//        chSysUnlock();
+//    }
+//    chThdCreateStatic(waNpxThread, sizeof(waNpxThread), NORMALPRIO, (tfunc_t)NpxThread, nullptr);
+
+    int indx = 0;
+    for(int i=0; i<28; i++) Leds.ClrBuf[indx++] = clGreen;
+    for(int i=0; i<20; i++) Leds.ClrBuf[indx++] = clRed;
+    for(int i=0; i<55; i++) Leds.ClrBuf[indx++] = clBlue;
+
+    Leds.SetCurrentColors();
 }
 
 void SetColor(Color_t AClr) {
     for(uint32_t i=0; i<FLASH_CNT; i++) FlashBuf[i].Clr = AClr;
+}
+
+void SetBackColor(Color_t AClr) {
+    BackClr = AClr;
 }
 
 void FadeIn()  { OnOffLayer.FadeIn();  }

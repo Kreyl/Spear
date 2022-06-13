@@ -25,8 +25,6 @@ static TmrKL_t TmrOneSecond {TIME_MS2I(999), evtIdEverySecond, tktPeriodic};
 static void OnMeasurementDone();
 
 // LEDs
-ColorHSV_t hsv;
-TmrKL_t TmrSave {TIME_MS2I(3600), evtIdTimeToSave, tktOneShot};
 static const NeopixelParams_t NpxParams {NPX_SPI, NPX_DATA_PIN, NPX_DMA, NPX_DMA_MODE(0)};
 Neopixels_t Leds{&NpxParams, BAND_CNT, BAND_SETUPS};
 #endif
@@ -67,10 +65,10 @@ int main(void) {
 
     // Load and check color
 //    Flash::Load((uint32_t*)&hsv, sizeof(ColorHSV_t));
-    hsv.DWord32 = EE::Read32(0);
-    if(hsv.H > 360) hsv.H = 120;
-    hsv.S = 100;
-    hsv.V = 100;
+//    hsv.DWord32 = EE::Read32(0);
+//    if(hsv.H > 360) hsv.H = 120;
+//    hsv.S = 100;
+//    hsv.V = 100;
 
     // ==== Leds ====
     Leds.Init();
@@ -79,8 +77,9 @@ int main(void) {
     PinSetHi(NPX_PWR_PIN);
 
     Eff::Init();
-    Eff::SetColor(hsv.ToRGB());
-    Eff::FadeIn();
+//    Eff::SetColor(clYellow);
+//    Eff::SetBackColor((Color_t){4, 4, 0});
+//    Eff::FadeIn();
 //    Leds.SetAll(clGreen);
 //    Leds.SetCurrentColors();
 
@@ -96,37 +95,16 @@ void ITask() {
 
 #if BUTTONS_ENABLED
             case evtIdButtons:
-//                Printf("Btn %u\r", Msg.BtnEvtInfo.Type);
-//                if(Msg.BtnEvtInfo.Type == beShortPress) {
-//                    IsEnteringSleep = !IsEnteringSleep;
-//                    if(IsEnteringSleep) Eff::FadeOut();
-//                    else Eff::FadeIn();
-//                }
-                if(Msg.BtnEvtInfo.BtnID == 0) {
-                    if(hsv.H < 360) hsv.H++;
-                    else hsv.H = 0;
+                Printf("Btn %u\r", Msg.BtnEvtInfo.Type);
+                if(Msg.BtnEvtInfo.Type == beLongPress) {
+                    IsEnteringSleep = !IsEnteringSleep;
+                    if(IsEnteringSleep) Eff::FadeOut();
+                    else Eff::FadeIn();
                 }
-                else if(Msg.BtnEvtInfo.BtnID == 1) {
-                    if(hsv.H > 0) hsv.H--;
-                    else hsv.H = 360;
-                }
-//                Printf("HSV %u; ", hsv.H);
-                Eff::SetColor(hsv.ToRGB());
-                // Prepare to save
-                TmrSave.StartOrRestart();
                 break;
 #endif
-            case evtIdTimeToSave:
-                EE::Write32(0, hsv.DWord32);
-                Eff::SetColor(clBlack);
-                chThdSleepMilliseconds(450);
-                Eff::SetColor(hsv.ToRGB());
-                break;
-
-            case evtIdFadeOutDone: /* EnterSleep(); */ break;
+            case evtIdFadeOutDone: EnterSleep(); break;
             case evtIdFadeInDone: break;
-
-            case evtIdIsCharging: break;
 
             case evtIdEverySecond: Adc.StartMeasurement(); break;
             case evtIdAdcRslt: OnMeasurementDone(); break;
@@ -135,7 +113,7 @@ void ITask() {
                 OnCmd((Shell_t*)Msg.Ptr);
                 ((Shell_t*)Msg.Ptr)->SignalCmdProcessed();
                 break;
-            default: Printf("Unhandled Msg %u\r", Msg.ID); break;
+//            default: Printf("Unhandled Msg %u\r", Msg.ID); break;
         } // Switch
     } // while true
 } // ITask()
@@ -186,9 +164,13 @@ void OnCmd(Shell_t *PShell) {
     else if(PCmd->NameIs("Version")) PShell->Print("%S %S\r", APP_NAME, XSTRINGIFY(BUILD_TIME));
 
     else if(PCmd->NameIs("Clr")) {
-        uint8_t FClr[3];
-        if(PCmd->GetArray<uint8_t>(FClr, 3) == retvOk) {
-            Eff::SetColor(Color_t(FClr[0], FClr[1], FClr[2]));
+        uint8_t FBuf[5];
+        if(PCmd->GetArray<uint8_t>(FBuf, 5) == retvOk) {
+            for(int i=0; i<FBuf[3]; i++) Leds.ClrBuf[i] = clBlack;
+            for(int i=FBuf[3]; i<(FBuf[3]+FBuf[4]); i++) Leds.ClrBuf[i].FromRGB(FBuf[0], FBuf[1], FBuf[2]);
+            for(int i=(FBuf[3]+FBuf[4]); i<180; i++) Leds.ClrBuf[i] = clBlack;
+//            Eff::SetColor(Color_t(FClr[0], FClr[1], FClr[2]));
+            Leds.SetCurrentColors();
             PShell->Ack(retvOk);
         }
         else PShell->Ack(retvCmdError);

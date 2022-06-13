@@ -13,6 +13,8 @@ namespace Eff {
 void Init();
 
 void SetColor(Color_t AClr);
+void SetBackColor(Color_t AClr);
+
 
 void FadeIn();
 void FadeOut();

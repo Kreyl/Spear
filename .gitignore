@@ -4,3 +4,5 @@
 *.xml
 *.prefs
 SpearNoRadio_hw/Fabric/SpearNR.step
+Spear_hw/Spear-backups/
+Spear_hw/_autosave-Spear.sch

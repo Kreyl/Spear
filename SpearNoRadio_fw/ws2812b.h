@@ -68,7 +68,7 @@ private:
     uint32_t IBitBufSz = 0;
     uint8_t *IBitBuf = nullptr;
     const NeopixelParams_t *Params;
-    const stm32_dma_stream_t *PDma;
+    const stm32_dma_stream_t *PDma = nullptr;
 public:
     // Band setup
     const int32_t BandCnt;
