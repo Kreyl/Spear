@@ -39,13 +39,6 @@ typedef std::vector<Color_t> ColorBuf_t;
                         | STM32_DMA_CR_DIR_M2P)  /* Direction is memory to peripheral */ \
                         | STM32_DMA_CR_TCIE
 
-// Band setup
-enum BandDirection_t {dirForward, dirBackward};
-struct BandSetup_t {
-    int32_t Length;
-    BandDirection_t Dir;
-};
-
 struct NeopixelParams_t {
     // SPI
     Spi_t ISpi;
@@ -71,24 +64,19 @@ private:
     const stm32_dma_stream_t *PDma = nullptr;
 public:
     // Band setup
-    const int32_t BandCnt;
-    const BandSetup_t *BandSetup;
     bool TransmitDone = false;
     ftVoidVoid OnTransmitEnd = nullptr;
     // Methods
-    Neopixels_t(const NeopixelParams_t *APParams,
-            const uint32_t ABandCnt, const BandSetup_t *PBandSetup) : Params(APParams),
-                    BandCnt(ABandCnt), BandSetup(PBandSetup) { }
+    Neopixels_t(const NeopixelParams_t *APParams) : Params(APParams) { }
     void SetCurrentColors();
     void OnDmaDone();
-    int32_t LedCntTotal = 0;
     ColorBuf_t ClrBuf;
     void Init();
     void SetAll(Color_t Clr) {
-        for(int32_t i=0; i<LedCntTotal; i++) ClrBuf[i] = Clr;
+        for(int32_t i=0; i<LED_CNT_TOTAL; i++) ClrBuf[i] = Clr;
     }
     bool AreOff() {
-        for(uint8_t i=0; i<LedCntTotal; i++) { if(ClrBuf[i] != clBlack) return false; }
+        for(uint8_t i=0; i<LED_CNT_TOTAL; i++) { if(ClrBuf[i] != clBlack) return false; }
         return true;
     }
 };

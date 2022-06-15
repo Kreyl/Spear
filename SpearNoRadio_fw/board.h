@@ -28,6 +28,13 @@
 
 #define ADC_REQUIRED    TRUE
 
+// LEDs config
+#define MOON_START_INDX     0
+#define MOON_LED_CNT        28
+#define SNAKE_START_INDX    28
+#define SNAKE_LED_CNT       75
+#define LED_CNT_TOTAL       (MOON_LED_CNT + SNAKE_LED_CNT)
+
 // LEDs config: BandCnt; {LedCnt1, LedCnt2, LedCnt3...}
 #define BAND_CNT        3
 #define BAND_SETUPS     ((const BandSetup_t[]){\

@@ -23,24 +23,24 @@ static Color_t BackClr;
 // Do not touch
 #define BRT_MAX     255L
 
-static void SetColorRing(int32_t Indx, Color_t Clr) {
-    if(Indx < 0) return;
-    int32_t NStart = 0;
-    for(int32_t n=0; n < Leds.BandCnt; n++) { // Iterate bands
-        int32_t Length = Leds.BandSetup[n].Length; // to make things shorter
-        if(Indx < Length) {
-            uint32_t i;
-            if(Leds.BandSetup[n].Dir == dirForward) i = NStart + Indx;
-            else i = NStart + Length - 1 - Indx;
-            Leds.ClrBuf[i] = Clr;
-        }
-        NStart += Length; // Calculate start indx of next band
-    }
+// Indx 0 is top of the head
+static void SetSnakeColor(int32_t Indx, Color_t Clr) {
+    if(Indx < 0 or Indx >= SNAKE_LED_CNT) return;
+    Indx += SNAKE_START_INDX;
+    Leds.ClrBuf[Indx] = Clr;
 }
 
-void MixToBuf(Color_t Clr, int32_t Brt, int32_t Indx) {
-//    Printf("%u\r", Brt);
-    SetColorRing(Indx, Color_t(Clr, BackClr, Brt));
+static void SetMoonColor(int32_t Indx, Color_t Clr) {
+    if(Indx < 0 or Indx >= MOON_LED_CNT) return;
+    Indx += MOON_START_INDX;
+    Leds.ClrBuf[Indx] = Clr;
+}
+
+void MixSnakeToBuf(Color_t Clr, int32_t Brt, int32_t Indx) {
+    SetSnakeColor(Indx, Color_t(Clr, BackClr, Brt));
+}
+void MixMoonToBuf(Color_t Clr, int32_t Brt, int32_t Indx) {
+    SetMoonColor(Indx, Color_t(Clr, BackClr, Brt));
 }
 
 #if 1 // ======= Flash =======
@@ -64,7 +64,7 @@ public:
     Color_t Clr = FLASH_CLR;
     void Apply() {
         for(int32_t i=0; i<Len; i++) {
-            MixToBuf(Clr, ((BRT_MAX * (Len - i)) / Len), IndxStart - i);
+//            MixToBuf(Clr, ((BRT_MAX * (Len - i)) / Len), IndxStart - i);
         }
     }
 
@@ -111,7 +111,7 @@ private:
 public:
     void Apply() {
         if(State == stIdle) return; // No movement here
-        for(int32_t i=0; i<Leds.LedCntTotal; i++) {
+        for(int32_t i=0; i<LED_CNT_TOTAL; i++) {
             ColorHSV_t ClrH;
             ClrH.FromRGB(Leds.ClrBuf[i]);
             ClrH.V = (ClrH.V * Brt) / BRT_MAX;
@@ -168,7 +168,7 @@ void OnOffTmrCallback(void *p) {
     chSysUnlockFromISR();
 }
 #endif
-/*
+
 // Thread
 static THD_WORKING_AREA(waNpxThread, 512);
 __noreturn
@@ -179,14 +179,13 @@ static void NpxThread(void *arg) {
         // Reset colors
         Leds.SetAll(BackClr);
         // Iterate flashes
-        for(Flash_t &IFlash : FlashBuf) IFlash.Apply();
+//        for(Flash_t &IFlash : FlashBuf) IFlash.Apply();
         // Process OnOff
         OnOffLayer.Apply();
         // Show it
         Leds.SetCurrentColors();
     }
 }
-*/
 
 namespace Eff {
 void Init() {
@@ -195,19 +194,19 @@ void Init() {
 //        FlashBuf[i].GenerateI(i * 1107 + 9);
 //        chSysUnlock();
 //    }
-//    chThdCreateStatic(waNpxThread, sizeof(waNpxThread), NORMALPRIO, (tfunc_t)NpxThread, nullptr);
+    chThdCreateStatic(waNpxThread, sizeof(waNpxThread), NORMALPRIO, (tfunc_t)NpxThread, nullptr);
 
-    int indx = 0;
-    for(int i=0; i<28; i++) Leds.ClrBuf[indx++] = clGreen;
-    for(int i=0; i<20; i++) Leds.ClrBuf[indx++] = clRed;
-    for(int i=0; i<55; i++) Leds.ClrBuf[indx++] = clBlue;
+//    int indx = 0;
+//    for(int i=0; i<28; i++) Leds.ClrBuf[indx++] = clGreen;
+//    for(int i=0; i<20; i++) Leds.ClrBuf[indx++] = clRed;
+//    for(int i=0; i<55; i++) Leds.ClrBuf[indx++] = clBlue;
 
-    Leds.SetCurrentColors();
+//    Leds.SetCurrentColors();
 }
 
-void SetColor(Color_t AClr) {
-    for(uint32_t i=0; i<FLASH_CNT; i++) FlashBuf[i].Clr = AClr;
-}
+//void SetColor(Color_t AClr) {
+////    for(uint32_t i=0; i<FLASH_CNT; i++) FlashBuf[i].Clr = AClr;
+//}
 
 void SetBackColor(Color_t AClr) {
     BackClr = AClr;

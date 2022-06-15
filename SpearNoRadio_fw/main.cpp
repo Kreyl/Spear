@@ -26,7 +26,7 @@ static void OnMeasurementDone();
 
 // LEDs
 static const NeopixelParams_t NpxParams {NPX_SPI, NPX_DATA_PIN, NPX_DMA, NPX_DMA_MODE(0)};
-Neopixels_t Leds{&NpxParams, BAND_CNT, BAND_SETUPS};
+Neopixels_t Leds{&NpxParams};
 #endif
 
 int main(void) {
@@ -79,7 +79,8 @@ int main(void) {
     Eff::Init();
 //    Eff::SetColor(clYellow);
 //    Eff::SetBackColor((Color_t){4, 4, 0});
-//    Eff::FadeIn();
+    Eff::SetBackColor(clYellow);
+    Eff::FadeIn();
 //    Leds.SetAll(clGreen);
 //    Leds.SetCurrentColors();
 
