@@ -27,6 +27,7 @@ static void OnMeasurementDone();
 // LEDs
 static const NeopixelParams_t NpxParams {NPX_SPI, NPX_DATA_PIN, NPX_DMA, NPX_DMA_MODE(0)};
 Neopixels_t Leds{&NpxParams};
+bool IsYellow;
 #endif
 
 int main(void) {
@@ -80,6 +81,7 @@ int main(void) {
 //    Eff::SetColor(clYellow);
 //    Eff::SetBackColor((Color_t){4, 4, 0});
     Eff::SetBackColor(clYellow);
+    IsYellow = true;
     Eff::FadeIn();
 //    Leds.SetAll(clGreen);
 //    Leds.SetCurrentColors();
@@ -102,10 +104,16 @@ void ITask() {
                     if(IsEnteringSleep) Eff::FadeOut();
                     else Eff::FadeIn();
                 }
+                else if(Msg.BtnEvtInfo.Type == beShortPress) {
+                    if(IsYellow) Eff::SetBackColor(clGreen);
+                    else         Eff::SetBackColor(clYellow);
+                    IsYellow = !IsYellow;
+                }
                 break;
 #endif
-            case evtIdFadeOutDone: EnterSleep(); break;
-            case evtIdFadeInDone: break;
+            case evtIdLedsDone:
+                if(IsEnteringSleep) EnterSleep();
+                break;
 
             case evtIdEverySecond: Adc.StartMeasurement(); break;
             case evtIdAdcRslt: OnMeasurementDone(); break;

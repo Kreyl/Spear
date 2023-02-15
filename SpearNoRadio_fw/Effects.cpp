@@ -15,8 +15,6 @@
 
 extern Neopixels_t Leds;
 
-static Color_t BackClr;
-
 // On-off layer
 #define SMOOTH_VAR      180
 
@@ -24,24 +22,24 @@ static Color_t BackClr;
 #define BRT_MAX     255L
 
 // Indx 0 is top of the head
-static void SetSnakeColor(int32_t Indx, Color_t Clr) {
-    if(Indx < 0 or Indx >= SNAKE_LED_CNT) return;
-    Indx += SNAKE_START_INDX;
-    Leds.ClrBuf[Indx] = Clr;
-}
+//static void SetSnakeColor(int32_t Indx, Color_t Clr) {
+//    if(Indx < 0 or Indx >= SNAKE_LED_CNT) return;
+//    Indx += SNAKE_START_INDX;
+//    Leds.ClrBuf[Indx] = Clr;
+//}
+//
+//static void SetMoonColor(int32_t Indx, Color_t Clr) {
+//    if(Indx < 0 or Indx >= MOON_LED_CNT) return;
+//    Indx += MOON_START_INDX;
+//    Leds.ClrBuf[Indx] = Clr;
+//}
 
-static void SetMoonColor(int32_t Indx, Color_t Clr) {
-    if(Indx < 0 or Indx >= MOON_LED_CNT) return;
-    Indx += MOON_START_INDX;
-    Leds.ClrBuf[Indx] = Clr;
-}
-
-void MixSnakeToBuf(Color_t Clr, int32_t Brt, int32_t Indx) {
-    SetSnakeColor(Indx, Color_t(Clr, BackClr, Brt));
-}
-void MixMoonToBuf(Color_t Clr, int32_t Brt, int32_t Indx) {
-    SetMoonColor(Indx, Color_t(Clr, BackClr, Brt));
-}
+//void MixSnakeToBuf(Color_t Clr, int32_t Brt, int32_t Indx) {
+//    SetSnakeColor(Indx, Color_t(Clr, BackClr, Brt));
+//}
+//void MixMoonToBuf(Color_t Clr, int32_t Brt, int32_t Indx) {
+//    SetMoonColor(Indx, Color_t(Clr, BackClr, Brt));
+//}
 
 #if 1 // ======= Flash =======
 #define FLASH_CLR       (Color_t(0, 255, 9))
@@ -100,71 +98,64 @@ Flash_t FlashBuf[FLASH_CNT];
 #if 1 // ======= OnOff Layer =======
 void OnOffTmrCallback(void *p);
 
-class OnOffLayer_t {
+//static uint32_t CalcDelayFromClrs(Color_t Clr1, Color_t Clr2) {
+//    uint8_t v = Clr1.R < Clr2.R? Clr1.R : Clr2.R;
+//    uint32_t dmax = ClrCalcDelay(v, SMOOTH_VAR);
+//    v = Clr1.G < Clr2.G? Clr1.G : Clr2.G;
+//    uint32_t d2 = ClrCalcDelay(v, SMOOTH_VAR);
+//    if(d2 > dmax) dmax = d2;
+//    v = Clr1.B < Clr2.B? Clr1.B : Clr2.B;
+//    d2 = ClrCalcDelay(v, SMOOTH_VAR);
+//    if(d2 > dmax) dmax = d2;
+//    return dmax;
+//}
+
+class BackLayer_t {
 private:
-    int32_t Brt = 0;
-    enum State_t {stIdle, stFadingOut, stFadingIn} State;
+    bool IsIdle;
     virtual_timer_t ITmr;
     void StartTimerI(uint32_t ms) {
         chVTSetI(&ITmr, TIME_MS2I(ms), OnOffTmrCallback, nullptr);
     }
+    void StartTimerOrSendEvtI() {
+        if(ICurrClr == ITargetClr) EvtQMain.SendNowOrExitI(EvtMsg_t(evtIdLedsDone));
+        else StartTimerI(ICurrClr.DelayToNextAdj(ITargetClr, SMOOTH_VAR));
+    }
+    Color_t ITargetClr = clBlack, ICurrClr = clBlack, ISavedColor = START_CLR;
 public:
-    void Apply() {
-        if(State == stIdle) return; // No movement here
-        for(int32_t i=0; i<LED_CNT_TOTAL; i++) {
-            ColorHSV_t ClrH;
-            ClrH.FromRGB(Leds.ClrBuf[i]);
-            ClrH.V = (ClrH.V * Brt) / BRT_MAX;
-            Leds.ClrBuf[i].FromHSV(ClrH.H, ClrH.S, ClrH.V);
-        }
+    void Apply() { Leds.SetAll(ICurrClr); }
+
+    void SetColor(Color_t AClr) {
+        chSysLock();
+        ITargetClr = AClr;
+        ISavedColor = AClr;
+        StartTimerOrSendEvtI();
+        chSysUnlock();
     }
 
     void FadeIn() {
-        State = stFadingIn;
         chSysLock();
-        StartTimerI(ClrCalcDelay(Brt, SMOOTH_VAR));
+        ITargetClr = ISavedColor;
+        StartTimerOrSendEvtI();
         chSysUnlock();
     }
 
     void FadeOut() {
-        State = stFadingOut;
         chSysLock();
-        StartTimerI(ClrCalcDelay(Brt, SMOOTH_VAR));
+        ITargetClr = clBlack;
+        StartTimerOrSendEvtI();
         chSysUnlock();
     }
 
     void OnTmrI() {
-        switch(State) {
-            case stFadingIn:
-                if(Brt == BRT_MAX) {
-                    State = stIdle;
-                    EvtQMain.SendNowOrExitI(EvtMsg_t(evtIdFadeInDone));
-                }
-                else {
-                    Brt++;
-                    StartTimerI(ClrCalcDelay(Brt, SMOOTH_VAR));
-                }
-                break;
-
-            case stFadingOut:
-                if(Brt == 0) {
-                    State = stIdle;
-                    EvtQMain.SendNowOrExitI(EvtMsg_t(evtIdFadeOutDone));
-                }
-                else {
-                    Brt--;
-                    StartTimerI(ClrCalcDelay(Brt, SMOOTH_VAR));
-                }
-                break;
-
-            default: break;
-        }
+        ICurrClr.Adjust(ITargetClr);
+        StartTimerOrSendEvtI();
     }
-} OnOffLayer;
+} BackLayer;
 
 void OnOffTmrCallback(void *p) {
     chSysLockFromISR();
-    OnOffLayer.OnTmrI();
+    BackLayer.OnTmrI();
     chSysUnlockFromISR();
 }
 #endif
@@ -175,13 +166,10 @@ __noreturn
 static void NpxThread(void *arg) {
     chRegSetThreadName("Npx");
     while(true) {
-        chThdSleepMilliseconds(9);
-        // Reset colors
-        Leds.SetAll(BackClr);
-        // Iterate flashes
-//        for(Flash_t &IFlash : FlashBuf) IFlash.Apply();
+        chThdSleepMilliseconds(7);
+        Leds.SetAll(Color_t{0,0,0,0});// Clear buffer before proceeding
         // Process OnOff
-        OnOffLayer.Apply();
+        BackLayer.Apply();
         // Show it
         Leds.SetCurrentColors();
     }
@@ -208,11 +196,9 @@ void Init() {
 ////    for(uint32_t i=0; i<FLASH_CNT; i++) FlashBuf[i].Clr = AClr;
 //}
 
-void SetBackColor(Color_t AClr) {
-    BackClr = AClr;
-}
+void SetBackColor(Color_t AClr) { BackLayer.SetColor(AClr); }
 
-void FadeIn()  { OnOffLayer.FadeIn();  }
-void FadeOut() { OnOffLayer.FadeOut(); }
+void FadeIn()  { BackLayer.FadeIn();  }
+void FadeOut() { BackLayer.FadeOut(); }
 
 } // namespace

@@ -9,6 +9,8 @@
 
 #include "color.h"
 
+#define START_CLR   clYellow
+
 namespace Eff {
 void Init();
 
