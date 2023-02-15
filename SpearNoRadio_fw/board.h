@@ -2,7 +2,7 @@
 
 // ==== General ====
 #define BOARD_NAME          "Spear01"
-#define APP_NAME            "Staff"
+#define APP_NAME            "GoldStaff"
 
 #ifndef TRUE
 #define TRUE    1
