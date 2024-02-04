@@ -151,7 +151,7 @@ void ProcessButtons(PinSnsState_t *BtnState, uint32_t Len) {
 #endif
             ) {
 //                Uart.Printf("Elapsed %u\r", chVTTimeElapsedSinceX(LongPressTimer));
-                if(chVTTimeElapsedSinceX(LongPressTimer) >= TIME_MS2I(BTN_LONGPRESS_DELAY_MS)) {
+                if(chVTTimeElapsedSinceX(LongPressTimer) >= MS2ST(BTN_LONGPRESS_DELAY_MS)) {
                     IsLongPress[i] = true;
                     AddEvtToQueue(beLongPress, i);
                 }
@@ -160,7 +160,7 @@ void ProcessButtons(PinSnsState_t *BtnState, uint32_t Len) {
 
 #if BTN_LONG_COMBO
             if(IsCombo and !IsLongCombo) {
-                if(chVTTimeElapsedSinceX(LongComboTimer) >= TIME_MS2I(BTN_LONGPRESS_DELAY_MS)) {
+                if(chVTTimeElapsedSinceX(LongComboTimer) >= MS2ST(BTN_LONGPRESS_DELAY_MS)) {
                     IsLongCombo = true;
                     BtnEvtInfo_t IEvt;
                     IEvt.BtnCnt = 0;

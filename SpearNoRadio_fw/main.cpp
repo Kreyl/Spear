@@ -8,7 +8,7 @@
 #include "ws2812b.h"
 #include "color.h"
 #include "Effects.h"
-#include "kl_adc.h"
+#include "adcL151.h"
 
 #if 1 // ======================== Variables and defines ========================
 // Forever
@@ -19,6 +19,7 @@ static void ITask();
 static void OnCmd(Shell_t *PShell);
 static void EnterSleep();
 bool IsEnteringSleep = false;
+bool AdcFirstConversion = true;
 
 // Measure battery periodically
 static TmrKL_t TmrOneSecond {TIME_MS2I(999), evtIdEverySecond, tktPeriodic};
@@ -53,24 +54,24 @@ int main(void) {
     Clk.PrintFreqs();
 
 #if BUTTONS_ENABLED
-    SimpleSensors::Init();
+//    SimpleSensors::Init();
 #endif
 
     // ADC
-    PinSetupOut(ADC_BAT_EN, omPushPull);
-    PinSetHi(ADC_BAT_EN); // Enable it forever, as 200k produces ignorable current
-    PinSetupAnalog(ADC_BAT_PIN);
-    Adc.Init();
-    TmrOneSecond.StartOrRestart();
+//    PinSetupOut(ADC_BAT_EN, omPushPull);
+//    PinSetHi(ADC_BAT_EN); // Enable it forever, as 200k produces ignorable current
+//    PinSetupAnalog(ADC_BAT_PIN);
+//    Adc.Init();
+//    TmrOneSecond.StartOrRestart();
 
     // ==== Leds ====
-    Leds.Init();
-    // LED pwr pin
-    PinSetupOut(NPX_PWR_PIN, omPushPull);
-    PinSetHi(NPX_PWR_PIN);
+//    Leds.Init();
+//    // LED pwr pin
+//    PinSetupOut(NPX_PWR_PIN, omPushPull);
+//    PinSetHi(NPX_PWR_PIN);
 
-    Eff::Init();
-    Eff::FadeIn();
+//    Eff::Init();
+//    Eff::FadeIn();
 //    Leds.SetAll(clGreen);
 //    Leds.SetCurrentColors();
 
@@ -120,10 +121,10 @@ void ProcessIsCharging(PinSnsState_t *PState, uint32_t Len) {
 
 void OnMeasurementDone() {
 //    Printf("AdcDone\r");
-    if(Adc.FirstConversion) Adc.FirstConversion = false;
+    if(AdcFirstConversion) AdcFirstConversion = false;
     else {
-        uint32_t VRef_adc = Adc.GetResult(ADC_VREFINT_CHNL);
-        uint32_t Vadc = Adc.GetResult(BAT_CHNL);
+        uint32_t VRef_adc = Adc.GetResultMedian(ADC_VREFINT_CHNL);
+        uint32_t Vadc = Adc.GetResultMedian(BAT_CHNL);
         uint32_t Vmv = Adc.Adc2mV(Vadc, VRef_adc);
 //        Printf("VrefAdc=%u; Vadc=%u; Vmv=%u\r", VRef_adc, Vadc, Vmv);
         uint32_t Battery_mV = Vmv * 2; // Resistor divider

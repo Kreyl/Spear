@@ -24,7 +24,7 @@
 // OS timer settings
 #define STM32_ST_IRQ_PRIORITY   2
 #define STM32_ST_USE_TIMER      2
-#define STM32_TIMCLK1           (Clk.APB1FreqHz)
+#define SYS_TIM_CLK             (Clk.APB1FreqHz)
 
 #define ADC_REQUIRED    TRUE
 
@@ -63,6 +63,9 @@
 #endif // GPIO
 
 #if ADC_REQUIRED // ======================= Inner ADC ==========================
+// Clock divider: clock is generated from the APB2
+#define ADC_CLK_DIVIDER     adcDiv2
+
 #define BAT_CHNL            9
 #define ADC_VREFINT_CHNL    17  // All 4xx, F072 and L151 devices. Do not change.
 #define ADC_CHANNELS        { BAT_CHNL, ADC_VREFINT_CHNL }

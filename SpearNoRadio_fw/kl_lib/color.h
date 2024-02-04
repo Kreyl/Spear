@@ -1,11 +1,12 @@
 /*
  * color.h
  *
- *  Created on: 05 апр. 2014 г.
+ *  Created on: 05 пїЅпїЅпїЅ. 2014 пїЅ.
  *      Author: Kreyl
  */
 
-#pragma once
+#ifndef COLOR_H__
+#define COLOR_H__
 
 #include "inttypes.h"
 #include <sys/cdefs.h>
@@ -37,7 +38,7 @@ static inline int32_t CalcSmooth_st_from_ms(int32_t Duration_ms) {
 struct Color_t {
 private:
     __always_inline
-    inline uint8_t SetSingleBrt(int32_t v, const int32_t Brt, const int32_t BrtMax) {
+    uint8_t SetSingleBrt(int32_t v, const int32_t Brt, const int32_t BrtMax) {
         if(v > 0) {
             v = (v * Brt) / BrtMax;
             if(v == 0) v = 1;
@@ -381,7 +382,6 @@ struct ColorHSV_t {
     bool operator != (const ColorHSV_t &AColor) const { return (DWord32 != AColor.DWord32); }
 
     ColorHSV_t() : H(0), S(0), V(0) {}
-    ColorHSV_t(const Color_t &Clr) { FromRGB(Clr); }
     ColorHSV_t(uint16_t AH, uint8_t AS, uint8_t AV) : H(AH), S(AS), V(AV) {}
     ColorHSV_t(const ColorHSV_t &AClr) : H(AClr.H), S(AClr.S), V(AClr.V) {}
 } __attribute__((packed));
@@ -432,3 +432,5 @@ struct ColorHSV_t {
 #define clRGBWCyan      ((Color_t){0, 255, 255,   0})
 #define clRGBWWhite     ((Color_t){0,   0,   0, 255})
 #endif
+
+#endif //COLOR_H__

@@ -1,7 +1,7 @@
-#pragma once
+#ifndef KL_I2C_H__
+#define KL_I2C_H__
 
 #include "kl_lib.h"
-#include "board.h"
 
 #if defined STM32L1XX || defined STM32F2XX || defined STM32F4XX
 struct i2cParams_t {
@@ -125,3 +125,5 @@ public:
 
 extern i2c_t i2c1, i2c2, i2c3;
 #endif
+
+#endif //KL_I2C_H__
