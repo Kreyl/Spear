@@ -1503,7 +1503,7 @@ uint8_t Clk_t::SwitchToHSE() {
 
 // Enables HSE, enables PLL, switches to PLL
 uint8_t Clk_t::SwitchToPLL() {
-    if(EnableHSE() != 0) return 1;
+//    if(EnableHSE() != 0) return 1;
     if(EnablePLL() != 0) return 2;
     // Select PLL as system clock src
     RCC->CFGR |= RCC_CFGR_SW_PLL;
@@ -1531,7 +1531,6 @@ uint8_t Clk_t::SetupPLLDividers(PllMul_t PllMul, PllDiv_t PllDiv) {
     tmp &= RCC_CFGR_PLLDIV | RCC_CFGR_PLLMUL;
     tmp |= ((uint32_t)PllDiv) << 22;
     tmp |= ((uint32_t)PllMul) << 18;
-    tmp |= RCC_CFGR_PLLSRC_HSE;
     RCC->CFGR = tmp;
     return 0;
 }
@@ -2747,13 +2746,13 @@ void Spi_t::Setup(BitOrder_t BitOrder, CPOL_t CPOL, CPHA_t CPHA,
     div = Clk.APBFreqHz / Bitrate_Hz;
 #endif
     SpiClkDivider_t ClkDiv = sclkDiv2;
-    if     (div >= 128) ClkDiv = sclkDiv256;
-    else if(div >= 64) ClkDiv = sclkDiv128;
-    else if(div >= 32) ClkDiv = sclkDiv64;
-    else if(div >= 16) ClkDiv = sclkDiv32;
-    else if(div >= 8)  ClkDiv = sclkDiv16;
-    else if(div >= 4)  ClkDiv = sclkDiv8;
-    else if(div >= 2)  ClkDiv = sclkDiv4;
+    if     (div > 128) ClkDiv = sclkDiv256;
+    else if(div > 64) ClkDiv = sclkDiv128;
+    else if(div > 32) ClkDiv = sclkDiv64;
+    else if(div > 16) ClkDiv = sclkDiv32;
+    else if(div > 8)  ClkDiv = sclkDiv16;
+    else if(div > 4)  ClkDiv = sclkDiv8;
+    else if(div > 2)  ClkDiv = sclkDiv4;
     PSpi->CR1 |= ((uint16_t)ClkDiv) << 3;
     // Bit number
 #if defined STM32L1XX || defined STM32F10X_LD_VL || defined STM32F2XX || defined STM32F4XX

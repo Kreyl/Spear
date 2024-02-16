@@ -36,7 +36,7 @@ void main(void) {
     SetupVCore(vcore1V8);
     // PLL fed by HSI
     if(Clk.EnableHSI() == retvOk) {
-        Clk.SetupFlashLatency(16);
+        Clk.SetupFlashLatency(11);
         Clk.SetupPLLSrc(pllSrcHSI16);
         Clk.SetupPLLDividers(pllMul4, pllDiv3);
         Clk.SetupBusDividers(ahbDiv2, apbDiv1, apbDiv1);
@@ -127,7 +127,7 @@ void OnMeasurementDone() {
         uint32_t VRef_adc = Adc.GetResultMedian(ADC_VREFINT_CHNL);
         uint32_t Vadc = Adc.GetResultMedian(BAT_CHNL);
         uint32_t Vmv = Adc.Adc2mV(Vadc, VRef_adc);
-        Printf("VrefAdc=%u; Vadc=%u; Vmv=%u\r", VRef_adc, Vadc, Vmv);
+//        Printf("VrefAdc=%u; Vadc=%u; Vmv=%u\r", VRef_adc, Vadc, Vmv);
         uint32_t Battery_mV = Vmv * 2; // Resistor divider
         Printf("Vbat=%u\r", Battery_mV);
         if(Battery_mV < 2800) {

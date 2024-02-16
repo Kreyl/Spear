@@ -4,3 +4,7 @@
 *.xml
 *.prefs
 SpearNoRadio_hw/Fabric/SpearNR.step
+SpearNoRadio_hw/#auto_saved_files#
+SpearNoRadio_hw/_autosave-SpearNR.kicad_pcb
+SpearNoRadio_hw/_autosave-SpearNR.sch
+SpearNoRadio_hw/SpearNR-backups/
