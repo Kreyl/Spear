@@ -12,8 +12,7 @@ void Neopixels_t::Init() {
     Params->ISpi.EnableTxDma();
 
     // Allocate memory
-    LedCntTotal = 0;
-    for(int32_t i=0; i<BandCnt; i++) LedCntTotal += BandSetup[i].Length;
+    LedCntTotal = LED_CNT_TOTAL;
     Printf("LedCnt: %u\r", LedCntTotal);
     IBitBufSz = TOTAL_BYTE_CNT(LedCntTotal);
     Printf("TotalByteCnt: %u\r", IBitBufSz);

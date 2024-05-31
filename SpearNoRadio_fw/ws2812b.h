@@ -70,15 +70,10 @@ private:
     const NeopixelParams_t *Params;
     const stm32_dma_stream_t *PDma = nullptr;
 public:
-    // Band setup
-    const int32_t BandCnt;
-    const BandSetup_t *BandSetup;
     bool TransmitDone = false;
     ftVoidVoid OnTransmitEnd = nullptr;
     // Methods
-    Neopixels_t(const NeopixelParams_t *APParams,
-            const uint32_t ABandCnt, const BandSetup_t *PBandSetup) : Params(APParams),
-                    BandCnt(ABandCnt), BandSetup(PBandSetup) { }
+    Neopixels_t(const NeopixelParams_t *APParams) : Params(APParams) { }
     void SetCurrentColors();
     void OnDmaDone();
     int32_t LedCntTotal = 0;

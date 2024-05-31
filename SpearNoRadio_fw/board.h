@@ -2,7 +2,7 @@
 
 // ==== General ====
 #define BOARD_NAME          "Spear01"
-#define APP_NAME            "StaffDark1"
+#define APP_NAME            "Snake"
 
 #ifndef TRUE
 #define TRUE    1
@@ -28,14 +28,12 @@
 
 #define ADC_REQUIRED    TRUE
 
-// LEDs config: BandCnt; {LedCnt1, LedCnt2, LedCnt3...}
-#define BAND_CNT        4
-#define BAND_SETUPS     ((const BandSetup_t[]){\
-    {31, dirForward}, \
-    {18, dirForward}, \
-    {18, dirBackward}, \
-    {31, dirForward}, \
-    })
+// LEDs config
+#define MOON_START_INDX     0
+#define MOON_LED_CNT        28
+#define SNAKE_START_INDX    28
+#define SNAKE_LED_CNT       75
+#define LED_CNT_TOTAL       (MOON_LED_CNT + SNAKE_LED_CNT)
 
 #if 1 // ========================== GPIO =======================================
 // PortMinTim_t: GPIO, Pin, Tim, TimChnl, invInverted, omPushPull, TopValue

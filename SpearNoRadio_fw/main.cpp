@@ -28,7 +28,12 @@ static void OnMeasurementDone();
 
 // LEDs
 static const NeopixelParams_t NpxParams {NPX_SPI, NPX_DATA_PIN, NPX_DMA, NPX_DMA_MODE(0)};
-Neopixels_t Leds{&NpxParams, BAND_CNT, BAND_SETUPS};
+Neopixels_t Leds{&NpxParams};
+static const uint32_t kclr_cnt = 4;
+static Color_t colors[kclr_cnt] = {
+        clYellow, clGreen, clMagenta, clRed,
+};
+static uint32_t clr_indx = 0;
 #endif
 
 void main(void) {
@@ -72,6 +77,7 @@ void main(void) {
     PinSetHi(NPX_PWR_PIN);
 
     Eff::Init();
+    Eff::SetBackColor(colors[clr_indx]);
     Eff::FadeIn();
 //    Leds.SetAll(clGreen);
 //    Leds.SetCurrentColors();
@@ -89,15 +95,21 @@ void ITask() {
 #if BUTTONS_ENABLED
             case evtIdButtons:
                 Printf("Btn %u\r", Msg.BtnEvtInfo.Type);
-                if(Msg.BtnEvtInfo.Type == beShortPress) {
+                if(Msg.BtnEvtInfo.Type == beLongPress) {
                     IsEnteringSleep = !IsEnteringSleep;
                     if(IsEnteringSleep) Eff::FadeOut();
                     else Eff::FadeIn();
                 }
+                else if(Msg.BtnEvtInfo.Type == beShortPress) {
+                    clr_indx++;
+                    if(clr_indx >= kclr_cnt) clr_indx = 0;
+                    Eff::SetBackColor(colors[clr_indx]);
+                }
                 break;
 #endif
-            case evtIdFadeOutDone: EnterSleep(); break;
-            case evtIdFadeInDone: break;
+            case evtIdLedsDone:
+                if(IsEnteringSleep) EnterSleep();
+                break;
 
             case evtIdIsCharging: break;
 

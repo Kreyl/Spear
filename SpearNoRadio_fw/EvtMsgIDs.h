@@ -1,7 +1,7 @@
 /*
  * EvtMsgIDs.h
  *
- *  Created on: 21 апр. 2017 г.
+ *  Created on: 21 пїЅпїЅпїЅ. 2017 пїЅ.
  *      Author: Kreyl
  */
 
@@ -17,7 +17,8 @@ enum EvtMsgId_t {
 
     // Not eternal
     evtIdButtons,
-    evtIdFadeOutDone,
-    evtIdFadeInDone,
+//    evtIdFadeOutDone,
+//    evtIdFadeInDone,
     evtIdIsCharging,
+    evtIdLedsDone,
 };
