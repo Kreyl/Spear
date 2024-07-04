@@ -286,11 +286,11 @@ enum TmrKLType_t {tktOneShot, tktPeriodic};
 
 class TmrKL_t : private IrqHandler_t {
 private:
-    virtual_timer_t Tmr;
-    void StartI() { chVTSetI(&Tmr, Period, TmrKLCallback, this); }  // Will be reset before start
-    sysinterval_t Period;
-    EvtMsgId_t EvtId;
-    TmrKLType_t TmrType;
+    virtual_timer_t itmr;
+    void StartI() { chVTSetI(&itmr, period, TmrKLCallback, this); }  // Will be reset before start
+    sysinterval_t period;
+    EvtMsgId_t evt_id;
+    TmrKLType_t tmr_type;
     void IIrqHandler();
 public:
     void StartOrRestart() {
@@ -300,25 +300,25 @@ public:
     }
     void StartOrRestart(sysinterval_t NewPeriod) {
         chSysLock();
-        Period = NewPeriod;
+        period = NewPeriod;
         StartI();
         chSysUnlock();
     }
     void StartIfNotRunning() {
         chSysLock();
-        if(!chVTIsArmedI(&Tmr)) StartI();
+        if(!chVTIsArmedI(&itmr)) StartI();
         chSysUnlock();
     }
-    void Stop() { chVTReset(&Tmr); }
+    void Stop() { chVTReset(&itmr); }
 
-    void SetNewPeriod_ms(uint32_t NewPeriod) { Period = TIME_MS2I(NewPeriod); }
-    void SetNewPeriod_s(uint32_t NewPeriod) { Period = TIME_S2I(NewPeriod); }
+    void SetNewPeriod_ms(uint32_t NewPeriod) { period = TIME_MS2I(NewPeriod); }
+    void SetNewPeriod_s(uint32_t NewPeriod) { period = TIME_S2I(NewPeriod); }
 
     TmrKL_t(sysinterval_t APeriod, EvtMsgId_t AEvtId, TmrKLType_t AType) :
-        Period(APeriod), EvtId(AEvtId), TmrType(AType) {}
+        period(APeriod), evt_id(AEvtId), tmr_type(AType) {}
     // Dummy period is set
     TmrKL_t(EvtMsgId_t AEvtId, TmrKLType_t AType) :
-            Period(TIME_S2I(9)), EvtId(AEvtId), TmrType(AType) {}
+            period(TIME_S2I(9)), evt_id(AEvtId), tmr_type(AType) {}
 };
 #endif
 

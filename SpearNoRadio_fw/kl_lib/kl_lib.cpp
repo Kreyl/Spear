@@ -509,9 +509,9 @@ void TmrKLCallback(void *p) {
 }
 
 void TmrKL_t::IIrqHandler() {    // Call it inside callback
-    EvtMsg_t Msg(EvtId);
+    EvtMsg_t Msg(evt_id);
     EvtQMain.SendNowOrExitI(Msg);
-    if(TmrType == tktPeriodic) StartI();
+    if(tmr_type == tktPeriodic) StartI();
 }
 #endif
 

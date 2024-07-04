@@ -1,7 +1,7 @@
 /*
  * ChunkTypes.h
  *
- *  Created on: 08 ÿíâ. 2015 ã.
+ *  Created on: 08 ï¿½ï¿½ï¿½. 2015 ï¿½.
  *      Author: Kreyl
  */
 
@@ -73,7 +73,7 @@ protected:
     void IIrqHandler() {
         if(chVTIsArmedI(&ITmr)) chVTResetI(&ITmr);  // Reset timer
         while(true) {   // Process the sequence
-            switch(IPCurrentChunk->ChunkSort) {
+            switch(IPCurrentChunk->chunk_sort) {
                 case csSetup: // setup now and exit if required
                     if(ISetup() == sltBreak) return;
                     break;
