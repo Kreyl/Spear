@@ -20,8 +20,8 @@ extern void ProcessIsCharging(PinSnsState_t *PState, uint32_t Len);
 
 const PinSns_t PinSns[] = {
         // Buttons
-        {BTN1_PIN, ProcessButtons},
-//        {BTN2_PIN, ProcessButtons},
+        {BTN1_PIN, pudPullDown, ProcessButtons},
+//        {BTN2_PIN, pudPullDown, ProcessButtons},
         // IsCharging
         {IS_CHARGING_PIN, ProcessIsCharging},
 };

@@ -2,7 +2,7 @@
 
 // ==== General ====
 #define BOARD_NAME          "Spear01"
-#define APP_NAME            "StaffDark1"
+#define APP_NAME            "StaffWings"
 
 #ifndef TRUE
 #define TRUE    1
@@ -29,12 +29,12 @@
 #define ADC_REQUIRED    TRUE
 
 // LEDs config: BandCnt; {LedCnt1, LedCnt2, LedCnt3...}
-#define BAND_CNT        4
+#define FLAME_LEN       10
+#define BAND_CNT        3
 #define BAND_SETUPS     ((const BandSetup_t[]){\
-    {31, dirForward}, \
-    {18, dirForward}, \
-    {18, dirBackward}, \
-    {31, dirForward}, \
+    {FLAME_LEN, dirForward}, \
+    {FLAME_LEN, dirBackward}, \
+    {FLAME_LEN, dirForward}, \
     })
 
 #if 1 // ========================== GPIO =======================================
@@ -45,8 +45,8 @@
 #define UART_RX_PIN     10
 
 // Buttons
-#define BTN1_PIN        GPIOA, 0, pudPullDown
-#define BTN2_PIN        GPIOA, 1, pudPullDown
+#define BTN1_PIN        GPIOA, 0
+#define BTN2_PIN        GPIOA, 1
 
 // Charging
 #define IS_CHARGING_PIN GPIOA, 2, pudPullUp

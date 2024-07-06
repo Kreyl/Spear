@@ -34,6 +34,7 @@ extern const uint8_t AdcChannels[ADC_CHANNEL_CNT];
 
 // See datasheet, search VREFINT_CAL
 #define ADC_VREFINT_CAL     (*(volatile uint16_t*)0x1FF80078)
+#define ADC_VRIFINT_CAL_VOLTAGE_mV  3000UL
 
 enum AdcSampleTime_t {
         ast4Cycles = 0b000,
@@ -66,7 +67,7 @@ private:
 public:
     void EnableVRef()  { ADC->CCR |= (uint32_t)ADC_CCR_TSVREFE; }
     void DisableVRef() { ADC->CCR &= (uint32_t)(~ADC_CCR_TSVREFE); }
-    uint32_t GetVDAmV(uint32_t VrefADC) { return ((ADC_VREFINT_CAL * 3000UL) / VrefADC); }
+    uint32_t GetVDAmV(uint32_t VrefADC) { return ((ADC_VREFINT_CAL * ADC_VRIFINT_CAL_VOLTAGE_mV) / VrefADC); }
     void Init();
     void StartMeasurement();
     void Disable() { ADC1->CR2 = 0; }
@@ -74,7 +75,7 @@ public:
     uint32_t GetResultAverage(uint8_t AChannel);
     uint32_t GetResultMedian(uint8_t AChannel);
     uint32_t Adc2mV(uint32_t AdcChValue, uint32_t VrefValue) {
-        return ((3300UL * ADC_VREFINT_CAL / ADC_MAX_VALUE) * AdcChValue) / VrefValue;
+        return ((ADC_VRIFINT_CAL_VOLTAGE_mV * ADC_VREFINT_CAL / ADC_MAX_VALUE) * AdcChValue) / VrefValue;
     }
 };
 
