@@ -8,13 +8,16 @@
 #include "tinwi.h"
 #include "BaseSequencer.h"
 #include "ws2812b.h"
+#include "MsgQ.h"
 
 static const int32_t kLedCntTotal = FLAME_LEN * BAND_CNT;
 static const int32_t kTinwiCntMax = kLedCntTotal;
 static const int32_t kFramePeriod = 7;
 static const int32_t kBrtMax = 255;
+static const int32_t kOnOfSmooth = 450L;
 
 extern Neopixels_t leds;
+ColorHSV_t ClrBattery {0, 0, 0};
 
 Params param_set[] = {
         {
@@ -27,16 +30,8 @@ Params param_set[] = {
                 18,   // tinwi_cnt
                 4    // off_v
         },
-//        {
-//                270, // smooth_min
-//                540, // smooth_max
-//                180,  // brt_min
-//                255, // brt_max
-//                7,  // tinwi_cnt
-//                3    // off_brt
-//        },
 };
-static const uint32_t kparam_set_cnt = countof(param_set);
+//static const uint32_t kparam_set_cnt = countof(param_set);
 
 class Tinwe : public BaseSequencer_t<LedHSVChunk_t> {
 private:
@@ -101,19 +96,68 @@ void Tinwe::GenerateAndStart() {
     StartOrRestart(lsq);
 }
 
+#if 1 // ============================ On-Off Layer =============================
+enum PhaseState_t {stIdle, stFadingOut, stFadingIn, stStopping} PhaseState;
+int32_t OnOffBrt = 0;
+virtual_timer_t IOnOffTmr;
+
+void StartTimerI(uint32_t ms);
+
+void OnOffTmrCallback(void *p) {
+    chSysLockFromISR();
+    switch(PhaseState) {
+        case stFadingIn:
+            if(OnOffBrt == kBrtMax) PhaseState = stIdle;
+            else {
+                OnOffBrt++;
+                StartTimerI(ClrCalcDelay(OnOffBrt, kOnOfSmooth));
+            }
+            break;
+        case stFadingOut:
+            if(OnOffBrt == 0) {
+                PhaseState = stIdle;
+                EvtQMain.SendNowOrExitI(EvtMsg_t(evtIdLedsDone));
+            }
+            else {
+                OnOffBrt--;
+                StartTimerI(ClrCalcDelay(OnOffBrt, kOnOfSmooth));
+            }
+            break;
+        default: break;
+    }
+    chSysUnlockFromISR();
+}
+
+void StartTimerI(uint32_t ms) { chVTSetI(&IOnOffTmr, TIME_MS2I(ms), OnOffTmrCallback, nullptr); }
+void StopTimer() { chVTReset(&IOnOffTmr); }
+#endif
+
 static THD_WORKING_AREA(waEffThread, 512);
 static void EffThread(void *arg) {
     chRegSetThreadName("Tinwi");
 //    uint32_t time_passed = 0, params_indx = 0;;
     while(true) {
         chThdSleepMilliseconds(kFramePeriod);
+        // ==== On-Off Layer ====
+        for(Color_t &Clr : leds.ClrBuf) Clr.SetRGBBrightness(OnOffBrt, kBrtMax);
         leds.SetCurrentColors();
+
+        // Show charge if needed
+        if(ClrBattery.V != 0) {
+            leds.SetAll(ClrBattery.ToRGB());
+            leds.SetCurrentColors();
+            chThdSleepMilliseconds(1530);
+            leds.SetAll(clBlack);
+            ClrBattery.V = 0; // Do not show next time
+        }
 
         // Check if new generation required
         for(int32_t i=0; i<Tinwi::curr_params->tinwi_cnt; i++) {
             if(tinwi[i].IsIdle())
                 tinwi[i].GenerateAndStart();
         }
+
+
         // Check if change params
 //        time_passed += kFramePeriod;
 //        if(time_passed > 9000) {
@@ -131,9 +175,28 @@ void Init() {
     chThdCreateStatic(waEffThread, sizeof(waEffThread), NORMALPRIO, (tfunc_t)EffThread, nullptr);
 }
 
-void FadeIn() {}
-void FadeOut() {}
-void ShowCharge(ColorHSV_t hsv) {}
+void FadeIn() {
+    PhaseState = stFadingIn;
+    chSysLock();
+    StartTimerI(ClrCalcDelay(OnOffBrt, kOnOfSmooth));
+    chSysUnlock();
+}
+
+void FadeOut() {
+    PhaseState = stFadingOut;
+    chSysLock();
+    StartTimerI(ClrCalcDelay(OnOffBrt, kOnOfSmooth));
+    chSysUnlock();
+}
+
+void StopNow() {
+    StopTimer();
+    PhaseState = stStopping;
+    OnOffBrt = 0;
+//    MustStop = true;
+}
+
+void ShowCharge(ColorHSV_t hsv) { ClrBattery = hsv; }
 
 Params *curr_params = &param_set[0];
 } // namespace

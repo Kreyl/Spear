@@ -87,6 +87,7 @@ void main(void) {
     PinSetHi(NPX_PWR_PIN);
 
     Tinwi::Init();
+    Tinwi::FadeIn();
 
     // Wait until main button released
     while(Btn1IsPressed()) { chThdSleepMilliseconds(63); }
