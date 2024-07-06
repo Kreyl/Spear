@@ -5,10 +5,10 @@
 #include "SimpleSensors.h"
 #include "buttons.h"
 #include "ws2812b.h"
-#include "Flame.h"
 #include "adcL151.h"
 #include "Settings.h"
 #include "battery_consts.h"
+#include "tinwi.h"
 
 #if 1 // ======================== Variables and defines ========================
 // Forever
@@ -86,9 +86,7 @@ void main(void) {
     PinSetupOut(NPX_PWR_PIN, omPushPull);
     PinSetHi(NPX_PWR_PIN);
 
-    flames.SetNewSettings(flame_setup);
-    flames.Init();
-    flames.FadeIn();
+    Tinwi::Init();
 
     // Wait until main button released
     while(Btn1IsPressed()) { chThdSleepMilliseconds(63); }
@@ -118,8 +116,8 @@ void ITask() {
                 if(Msg.BtnEvtInfo.BtnID == 0) {
                     if(Msg.BtnEvtInfo.Type == beLongPress) {
                         IsEnteringSleep = !IsEnteringSleep;
-                        if(IsEnteringSleep) flames.FadeOut();
-                        else flames.FadeIn();
+                        if(IsEnteringSleep) Tinwi::FadeOut();
+                        else Tinwi::FadeIn();
                     }
                     else if(Msg.BtnEvtInfo.Type == beRelease) { // Show VBat
                         uint8_t percent = mV2PercentLiIon(battery_mV);
@@ -129,7 +127,7 @@ void ITask() {
                         else if(percent <  60) hsv = {30,  100, 100};
                         else if(percent <  90) hsv = {120, 100, 100};
                         else                   hsv = {240, 100, 100};
-                        flames.ShowCharge(hsv);
+                        Tinwi::ShowCharge(hsv);
                     }
                 }
                 break;
@@ -183,26 +181,6 @@ void EnterSleep() {
 }
 
 #if 1 // ================= Command processing ====================
-uint8_t GetSetup(Cmd_t *PCmd, FlameSettings &FSett) {
-    if(     PCmd->GetNext<uint8_t>(&FSett.Core.Sz) == retvOk and
-            PCmd->GetNext<uint16_t>(&FSett.Core.ClrHMin) == retvOk and
-            PCmd->GetNext<uint16_t>(&FSett.Core.ClrHMax) == retvOk and
-            PCmd->GetNext<uint8_t>(&FSett.Core.ClrV) == retvOk and
-            PCmd->GetNext<uint8_t>(&FSett.Sparks.Cnt) == retvOk and
-            PCmd->GetNext<uint8_t>(&FSett.Sparks.TailLen) == retvOk and
-            PCmd->GetNext<uint16_t>(&FSett.Sparks.ClrHMin) == retvOk and
-            PCmd->GetNext<uint16_t>(&FSett.Sparks.ClrHMax) == retvOk and
-            PCmd->GetNext<uint8_t>(&FSett.Sparks.ClrV) == retvOk and
-            PCmd->GetNext<uint16_t>(&FSett.Sparks.DelayBeforeRestart) == retvOk and
-            PCmd->GetNext<int16_t>(&FSett.Sparks.AccMin) == retvOk and
-            PCmd->GetNext<int16_t>(&FSett.Sparks.AccMax) == retvOk and
-            PCmd->GetNext<int16_t>(&FSett.Sparks.StartDelayMin) == retvOk and
-            PCmd->GetNext<int16_t>(&FSett.Sparks.StartDelayMax) == retvOk and
-            PCmd->GetNext<uint8_t>(&FSett.Sparks.Mode) == retvOk
-        ) return retvOk;
-    else return retvFail;
-}
-
 void OnCmd(Shell_t *pshell) {
 	Cmd_t *pcmd = &pshell->Cmd;
     if(pcmd->NameIs("Ping")) pshell->Ack(retvOk);
@@ -218,12 +196,8 @@ void OnCmd(Shell_t *pshell) {
         else pshell->Ack(retvBadValue);
     }
 
-    else if(pcmd->NameIs("Setup")) {
-        FlameSettings FSett;
-        if(GetSetup(pcmd, FSett) == retvOk) {
-            flames.SetNewSettings(FSett);
-            pshell->Ack(retvOk);
-        }
+    else if(pcmd->NameIs("params")) {
+        if(pcmd->GetArray<int32_t>(Tinwi::curr_params->arr, PARAM_CNT) == retvOk) pshell->Ack(retvOk);
         else pshell->Ack(retvBadValue);
     }
 

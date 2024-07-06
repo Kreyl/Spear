@@ -113,7 +113,7 @@ typedef void (*ftVoidPVoidLen)(void*p, uint32_t Len);
 // Virtual class for IRQ handlers and timer callbacks
 class IrqHandler_t {
 public:
-    virtual void IIrqHandler() = 0;
+    virtual void IIrqHandlerI() = 0;
 };
 
 // ==== Math ====
@@ -291,7 +291,7 @@ private:
     sysinterval_t Period;
     EvtMsgId_t EvtId;
     TmrKLType_t TmrType;
-    void IIrqHandler();
+    void IIrqHandlerI();
 public:
     void StartOrRestart() {
         chSysLock();

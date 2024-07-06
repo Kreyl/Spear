@@ -504,11 +504,11 @@ void Timer_t::SetUpdateFrequencyChangingTopValue(uint32_t FreqHz) const {
 // Universal VirtualTimer callback
 void TmrKLCallback(void *p) {
     chSysLockFromISR();
-    ((IrqHandler_t*)p)->IIrqHandler();
+    ((IrqHandler_t*)p)->IIrqHandlerI();
     chSysUnlockFromISR();
 }
 
-void TmrKL_t::IIrqHandler() {    // Call it inside callback
+void TmrKL_t::IIrqHandlerI() {    // Call it inside callback
     EvtMsg_t Msg(EvtId);
     EvtQMain.SendNowOrExitI(Msg);
     if(TmrType == tktPeriodic) StartI();
@@ -1111,7 +1111,7 @@ void Vector9C() {
     chSysLockFromISR();
 #if INDIVIDUAL_EXTI_IRQ_REQUIRED
     for(int i=5; i<=9; i++) {
-        if(ExtiIrqHandler[i] != nullptr) ExtiIrqHandler[i]->IIrqHandler();
+        if(ExtiIrqHandler[i] != nullptr) ExtiIrqHandler[i]->IIrqHandlerI();
     }
 #else
     if(ExtiIrqHandler_9_5 != nullptr) ExtiIrqHandler_9_5();
@@ -1128,7 +1128,7 @@ void VectorE0() {
     chSysLockFromISR();
 #if INDIVIDUAL_EXTI_IRQ_REQUIRED
     for(int i=10; i<=15; i++) {
-        if(ExtiIrqHandler[i] != nullptr) ExtiIrqHandler[i]->IIrqHandler();
+        if(ExtiIrqHandler[i] != nullptr) ExtiIrqHandler[i]->IIrqHandlerI();
     }
 #else
     if(ExtiIrqHandler_15_10 != nullptr) ExtiIrqHandler_15_10();
@@ -1148,11 +1148,11 @@ void Vector54() {
     uint32_t ClearMask = 0;
     if(EXTI->PR & (1<<0)) {
         ClearMask = 1<<0;
-        if(ExtiIrqHandler[0] != nullptr) ExtiIrqHandler[0]->IIrqHandler();
+        if(ExtiIrqHandler[0] != nullptr) ExtiIrqHandler[0]->IIrqHandlerI();
     }
     if(EXTI->PR & (1<<1)) {
         ClearMask += 1<<1;
-        if(ExtiIrqHandler[1] != nullptr) ExtiIrqHandler[1]->IIrqHandler();
+        if(ExtiIrqHandler[1] != nullptr) ExtiIrqHandler[1]->IIrqHandlerI();
     }
     EXTI->PR = ClearMask;
 #else
@@ -1172,11 +1172,11 @@ void Vector58() {
     uint32_t ClearMask = 0;
         if(EXTI->PR & (1<<2)) {
             ClearMask = 1<<2;
-            if(ExtiIrqHandler[2] != nullptr) ExtiIrqHandler[2]->IIrqHandler();
+            if(ExtiIrqHandler[2] != nullptr) ExtiIrqHandler[2]->IIrqHandlerI();
         }
         if(EXTI->PR & (1<<3)) {
             ClearMask += 1<<3;
-            if(ExtiIrqHandler[3] != nullptr) ExtiIrqHandler[3]->IIrqHandler();
+            if(ExtiIrqHandler[3] != nullptr) ExtiIrqHandler[3]->IIrqHandlerI();
         }
         EXTI->PR = ClearMask;
 #else
@@ -1198,7 +1198,7 @@ void Vector5C() {
         uint32_t Mask = 1<<i;
         if(EXTI->PR & Mask) {
             ClearMask += Mask;
-            if(ExtiIrqHandler[i] != nullptr) ExtiIrqHandler[i]->IIrqHandler();
+            if(ExtiIrqHandler[i] != nullptr) ExtiIrqHandler[i]->IIrqHandlerI();
         }
     }
     EXTI->PR = ClearMask;
