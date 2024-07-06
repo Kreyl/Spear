@@ -26,8 +26,8 @@ Params param_set[] = {
                 45,  // hsv_v_min
                 100, // hsv_v_max
                 117, // hsv_h_min
-                124, // hsv_h_max
-                18,   // tinwi_cnt
+                122, // hsv_h_max
+                18,  // tinwi_cnt
                 4    // off_v
         },
 };
@@ -37,11 +37,9 @@ class Tinwe : public BaseSequencer_t<LedHSVChunk_t> {
 private:
     ColorHSV_t curr_hsv{120, 100, 4};
     LedHSVChunk_t lsq[3] = { {Chunk::Setup}, {Chunk::Setup}, {Chunk::End} };
-    void SetColor(ColorHSV_t hsv) { leds.ClrBuf[led_indx] = hsv.ToRGB(); }
 public:
     int32_t led_indx = -1;
     void GenerateAndStart();
-    void SetBrightness(uint16_t abrt) { leds.ClrBuf[led_indx].SetRGBBrightness(abrt, kBrtMax); }
     // Base Sequencer's
     void SwitchOff() { leds.ClrBuf[led_indx] = clBlack; curr_hsv.DWord32 = 0; }
     bool AdjustAndCheckIfGotoNextChunk() {
@@ -49,13 +47,11 @@ public:
         if(curr_hsv == target_hsv) return true;
         // Not equal
         if(pcurrent_chunk->smooth_value == 0) { // If smooth is zero,
-            SetColor(target_hsv); // set color now and goto next chunk
-            curr_hsv = target_hsv;
+            curr_hsv = target_hsv;  // set color now and goto next chunk
             return true;
         }
         else { // smooth_value != 0, adjust it
             curr_hsv.Adjust(target_hsv);
-            SetColor(curr_hsv);
             // Check if equal now
             if(curr_hsv == target_hsv) return true;
             // Not equal, calculate time to next adjustment
@@ -64,6 +60,7 @@ public:
             return false;
         } // smooth_value != 0
     }
+    void SetCurrRGB() { leds.ClrBuf[led_indx] = curr_hsv.ToRGB(); }
 };
 
 static Tinwe tinwi[kTinwiCntMax];
@@ -138,9 +135,7 @@ static void EffThread(void *arg) {
 //    uint32_t time_passed = 0, params_indx = 0;;
     while(true) {
         chThdSleepMilliseconds(kFramePeriod);
-        // ==== On-Off Layer ====
-        for(Color_t &Clr : leds.ClrBuf) Clr.SetRGBBrightness(OnOffBrt, kBrtMax);
-        leds.SetCurrentColors();
+//        leds.SetAll((Color_t){0,0,0,0}); // Clear buffer before proceeding
 
         // Show charge if needed
         if(ClrBattery.V != 0) {
@@ -151,12 +146,17 @@ static void EffThread(void *arg) {
             ClrBattery.V = 0; // Do not show next time
         }
 
-        // Check if new generation required
+        // ==== Tinwi ====
         for(int32_t i=0; i<Tinwi::curr_params->tinwi_cnt; i++) {
-            if(tinwi[i].IsIdle())
-                tinwi[i].GenerateAndStart();
+            if(tinwi[i].IsIdle()) tinwi[i].GenerateAndStart(); // Check if new generation required
+            tinwi[i].SetCurrRGB(); // Draw them
         }
 
+        // ==== On-Off Layer ====
+        for(Color_t &Clr : leds.ClrBuf) Clr.SetRGBBrightness(OnOffBrt, kBrtMax);
+
+        // ==== Draw it ====
+        leds.SetCurrentColors();
 
         // Check if change params
 //        time_passed += kFramePeriod;
